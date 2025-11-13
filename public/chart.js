@@ -98,32 +98,34 @@ function renderResourceGaugeChart(ctx, label, plan, fact, i) {
     const over = fact > plan;
     const factColor = over ? '#ff9500' : '#34c759';
     const planColor = '#e0e0e0';
-    // Легенда убираем, суммы под чартом
-    const legendDiv = document.getElementById('resourceLegend' + i);
-    if (legendDiv) legendDiv.innerHTML = '';
-    // Суммы под чартом
-    const sumBlock = document.getElementById('resourceSumsBlock' + i);
-    if (sumBlock) {
-        sumBlock.innerHTML = `<div class=\"resource-sum-plan\">План: <span>${formatSum(plan)}</span></div><div class=\"resource-sum-fact\">Факт: <span>${formatSum(fact)}</span></div>`;
-    }
-    // Gauge chart с названием сверху
+    // Название сверху
     new Chart(ctx, {
-        type: 'doughnut',
+        type: 'bar',
         data: {
-            labels: ['Факт', 'План'],
-            datasets: [{
-                data: [Math.min(fact, plan), Math.max(plan - fact, 0)],
-                backgroundColor: [factColor, planColor],
-                borderWidth: 0,
-                cutout: '70%',
-                circumference: 180,
-                rotation: 270
-            }]
+            labels: [''],
+            datasets: [
+                {
+                    label: 'План',
+                    data: [plan],
+                    backgroundColor: planColor,
+                    borderRadius: 20,
+                    barPercentage: 1.0,
+                    categoryPercentage: 1.0,
+                },
+                {
+                    label: 'Факт',
+                    data: [Math.min(fact, plan)],
+                    backgroundColor: factColor,
+                    borderRadius: 20,
+                    barPercentage: 1.0,
+                    categoryPercentage: 1.0,
+                }
+            ]
         },
         options: {
+            indexAxis: 'x',
             plugins: {
                 legend: { display: false },
-                tooltip: { enabled: false },
                 title: {
                     display: true,
                     text: label,
@@ -134,10 +136,27 @@ function renderResourceGaugeChart(ctx, label, plan, fact, i) {
                 }
             },
             responsive: true,
-            aspectRatio: 2,
+            aspectRatio: 4,
             animation: false,
+            scales: {
+                x: {
+                    display: false,
+                    stacked: true,
+                    min: 0,
+                    max: plan,
+                },
+                y: {
+                    display: false,
+                    stacked: true,
+                }
+            }
         }
     });
+    // Суммы под чартом
+    const sumBlock = document.getElementById('resourceSumsBlock' + i);
+    if (sumBlock) {
+        sumBlock.innerHTML = `<div class=\"resource-sum-plan\">План: <span>${formatSum(plan)}</span></div><div class=\"resource-sum-fact\">Факт: <span>${formatSum(fact)}</span></div>`;
+    }
 }
 
 window.renderAnalysisCharts = function(role) {
