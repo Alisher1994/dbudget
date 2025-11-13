@@ -117,7 +117,7 @@ function renderResourceGaugeChart(ctx, label, plan, fact, i) {
                 data: [Math.min(fact, plan), Math.max(plan - fact, 0)],
                 backgroundColor: [factColor, planColor],
                 borderWidth: 0,
-                cutout: '60%', // чуть толще дуга
+                cutout: '70%', // стандартная толщина дуги
                 circumference: 180,
                 rotation: 270
             }]
