@@ -55,7 +55,6 @@
             <!-- Вкладка Объекты -->
             <div id="objects-tab" class="tab-content active">
                 <div class="tab-header">
-                    <h2 class="desktop-only">Объекты</h2>
                     <button id="addObjectBtn" class="btn btn-primary" style="display: none;">+ Добавить объект</button>
                 </div>
 
@@ -105,6 +104,26 @@
 
                 <!-- Подвкладка Анализ -->
                 <div id="analysis-subtab" class="sub-tab-content active">
+                    <div class="analysis-group">
+                        <h3 class="analysis-title">Анализ по финансам</h3>
+                        <div class="analysis-chart-container">
+                            <canvas id="financeBarChart" height="120"></canvas>
+                        </div>
+                    </div>
+                    <div class="analysis-group">
+                        <h3 class="analysis-title">Анализ по ресурсам</h3>
+                        <div class="resource-charts-grid">
+                            <div class="resource-chart-item"><canvas id="resourceChart0" height="100"></canvas></div>
+                            <div class="resource-chart-item"><canvas id="resourceChart1" height="100"></canvas></div>
+                            <div class="resource-chart-item"><canvas id="resourceChart2" height="100"></canvas></div>
+                            <div class="resource-chart-item"><canvas id="resourceChart3" height="100"></canvas></div>
+                            <div class="resource-chart-item"><canvas id="resourceChart4" height="100"></canvas></div>
+                            <div class="resource-chart-item"><canvas id="resourceChart5" height="100"></canvas></div>
+                            <div class="resource-chart-item"><canvas id="resourceChart6" height="100"></canvas></div>
+                            <div class="resource-chart-item"><canvas id="resourceChart7" height="100"></canvas></div>
+                            <div class="resource-chart-item"><canvas id="resourceChart8" height="100"></canvas></div>
+                        </div>
+                    </div>
                 </div>
 
                 <!-- Подвкладка Приход -->
@@ -274,6 +293,7 @@
         </div>
     </div>
 
+    <script src="chart.js"></script>
     <script src="dashboard.js"></script>
 </body>
 </html>

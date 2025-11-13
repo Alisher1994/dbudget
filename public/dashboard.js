@@ -436,19 +436,17 @@ function openObjectDetail(objectId) {
     if (!obj) return;
 
     currentObjectId = objectId;
-    
-    // Скрываем список объектов и показываем детальную страницу
     document.getElementById('objects-tab').classList.remove('active');
     document.getElementById('object-detail-tab').classList.add('active');
-    
-    // Обновляем навигацию
     document.querySelectorAll('.tab-button').forEach(btn => btn.classList.remove('active'));
-    
-    // Устанавливаем название объекта
     document.getElementById('objectDetailTitle').textContent = obj.name;
-    
-    // Переключаемся на вкладку Анализ
     switchSubTab('analysis');
+    // Рендерим графики анализа
+    setTimeout(() => {
+        if (window.renderAnalysisCharts) {
+            window.renderAnalysisCharts(currentUser.role);
+        }
+    }, 300);
 }
 
 // Обработчик кнопки "Назад"
@@ -477,6 +475,12 @@ document.addEventListener('DOMContentLoaded', () => {
             switchSubTab(subtabName);
         });
     });
+    
+    setTimeout(() => {
+        if (window.renderAnalysisCharts) {
+            window.renderAnalysisCharts(currentUser?.role || 'admin');
+        }
+    }, 500);
 });
 
 function switchSubTab(subtabName) {
