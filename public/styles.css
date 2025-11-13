@@ -990,9 +990,8 @@ body {
     overflow: hidden;
 }
 .income-table th, .income-table td {
-    padding: 12px;
-    text-align: left;
-    border-bottom: 1px solid var(--border-color);
+    width: 150px;
+    text-align: center;
 }
 .income-table th {
     background: var(--bg-secondary);

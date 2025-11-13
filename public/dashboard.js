@@ -182,6 +182,41 @@ function setupEventListeners() {
     };
 
     loadIncomeData();
+
+    const editIncome = document.querySelectorAll('.edit-btn');
+
+    editIncome.forEach((button, index) => {
+        button.addEventListener('click', () => {
+            const savedData = JSON.parse(localStorage.getItem('incomeData')) || [];
+            const incomeItem = savedData[index];
+
+            if (incomeItem) {
+                document.getElementById('incomeDate').value = incomeItem.date;
+                document.getElementById('incomeAmount').value = incomeItem.amount;
+                document.getElementById('incomeSender').value = incomeItem.sender;
+                document.getElementById('incomeReceiver').value = incomeItem.receiver;
+                const photoInput = document.getElementById('incomePhoto');
+                photoInput.value = '';
+
+                incomeModal.classList.add('active');
+
+                saveIncome.addEventListener('click', () => {
+                    incomeItem.date = document.getElementById('incomeDate').value;
+                    incomeItem.amount = document.getElementById('incomeAmount').value;
+                    incomeItem.sender = document.getElementById('incomeSender').value;
+                    incomeItem.receiver = document.getElementById('incomeReceiver').value;
+
+                    const updatedData = JSON.parse(localStorage.getItem('incomeData')) || [];
+                    updatedData[index] = incomeItem;
+                    localStorage.setItem('incomeData', JSON.stringify(updatedData));
+
+                    alert('Данные обновлены!');
+                    incomeModal.classList.remove('active');
+                    loadIncomeData();
+                });
+            }
+        });
+    });
 }
 
 function setupModal(modalId, openBtnId, closeBtnId, formId, submitHandler) {
