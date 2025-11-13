@@ -15,24 +15,48 @@ function formatSum(val) {
 // Финансовый анализ
 function renderFinanceChart(ctx, role) {
     let labels, data, colors;
+    // Берём реальные значения прихода из localStorage, чтобы связать вкладку "Приход" с графиком
+    const savedIncome = JSON.parse(localStorage.getItem('incomeData')) || [];
+    const incomeSum = savedIncome.reduce((s, it) => s + (parseFloat(it.amount) || 0), 0);
+
     if (role === 'admin') {
         labels = ['Бюджет', 'Приход', 'Потрачено', 'Остаток', 'Недостача', 'Экономия'];
-        data = [1000000, 800000, 600000, 200000, 0, 200000];
+        // Заменяем жестко закодированное значение прихода на сумму из записей
+        data = [1000000, incomeSum || 0, 600000, 200000, 0, 200000];
         colors = ['#0071e3', '#34c759', '#ff3b30', '#ffd600', '#ff9500', '#30d158'];
     } else {
         labels = ['Бюджет', 'Передано', 'Потрачено', 'Долг'];
-        data = [1000000, 800000, 600000, 200000];
+        data = [1000000, incomeSum || 0, 600000, 200000];
         colors = ['#0071e3', '#34c759', '#ff3b30', '#ff9500'];
     }
+
     // Суммы сверху
     const sumsRow = document.getElementById('financeSumsRow');
     if (sumsRow) {
         sumsRow.innerHTML = labels.map((l, i) => `<span class=\"analysis-sum-item\"><b>${l}:</b> ${formatSum(data[i])}</span>`).join('');
     }
-    // Легенда
+
+    // Легенда + дополнительное разбиение по отправителям (место прихода)
     const financeLegendDiv = document.getElementById('financeChartLegend');
     if (financeLegendDiv) {
         financeLegendDiv.innerHTML = labels.map((l, i) => `<span class=\"chart-legend-item\"><span class=\"chart-legend-color\" style=\"background:${colors[i]}\"></span>${l}</span>`).join('');
+
+        try {
+            if (savedIncome.length) {
+                const bySender = savedIncome.reduce((acc, it) => {
+                    const key = (it.sender || 'Неизвестно').trim();
+                    acc[key] = (acc[key] || 0) + (parseFloat(it.amount) || 0);
+                    return acc;
+                }, {});
+                const keys = Object.keys(bySender);
+                if (keys.length) {
+                    const senderHtml = keys.map((k, i) => `<span class=\"chart-legend-item\" style=\"margin-left:12px\"><span class=\"chart-legend-color\" style=\"background:${i%2? '#2ecc71':'#27ae60'}\"></span> ${k}: ${formatSum(bySender[k])}</span>`).join('');
+                    financeLegendDiv.innerHTML += `<div style=\"margin-top:8px;font-size:13px;color:var(--text-secondary)\"><b>Места прихода:</b> ${senderHtml}</div>`;
+                }
+            }
+        } catch (e) {
+            // ignore parsing errors
+        }
     }
     // Горизонтальный bar chart: чуть скруглённые, прямоугольные линии
     new Chart(ctx, {

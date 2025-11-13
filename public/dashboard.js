@@ -135,6 +135,7 @@ function setupEventListeners() {
         alert('Данные сохранены!');
         incomeModal.classList.remove('active');
         loadIncomeData();
+        if (window.renderAnalysisCharts) window.renderAnalysisCharts(currentUser?.role || 'admin');
     });
 
     const saveIncomeData = (row) => {
@@ -157,6 +158,7 @@ function setupEventListeners() {
         localStorage.setItem('incomeData', JSON.stringify(savedData));
 
         alert('Данные сохранены!');
+        if (window.renderAnalysisCharts) window.renderAnalysisCharts(currentUser?.role || 'admin');
     };
 
     const deleteIncomeData = (rowIndex) => {
@@ -164,6 +166,7 @@ function setupEventListeners() {
         savedData.splice(rowIndex, 1);
         localStorage.setItem('incomeData', JSON.stringify(savedData));
         loadIncomeData();
+        if (window.renderAnalysisCharts) window.renderAnalysisCharts(currentUser?.role || 'admin');
     };
 
     incomeTableBody.addEventListener('click', (event) => {
