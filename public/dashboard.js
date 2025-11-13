@@ -402,17 +402,8 @@ function openObjectDetail(objectId) {
     // Обновляем навигацию
     document.querySelectorAll('.tab-button').forEach(btn => btn.classList.remove('active'));
     
-    // Заполняем информацию об объекте
+    // Устанавливаем название объекта
     document.getElementById('objectDetailTitle').textContent = obj.name;
-    document.getElementById('detailAddress').textContent = obj.address || '—';
-    document.getElementById('detailClient').textContent = obj.client_name || '—';
-    document.getElementById('detailBudget').textContent = formatMoney(obj.budget);
-    document.getElementById('detailSpent').textContent = formatMoney(obj.spent);
-    
-    const remaining = (obj.budget || 0) - (obj.spent || 0);
-    const remainingEl = document.getElementById('detailRemaining');
-    remainingEl.textContent = formatMoney(remaining);
-    remainingEl.style.color = remaining < 0 ? 'var(--danger-color)' : 'var(--success-color)';
     
     // Переключаемся на вкладку Анализ
     switchSubTab('analysis');
