@@ -559,6 +559,50 @@ body {
     margin-bottom: 16px;
 }
 .analysis-sums-row {
+    flex-wrap: wrap;
+    gap: 18px;
+    margin-bottom: 18px;
+}
+
+.finance-info-block {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: var(--bg-secondary);
+    border-radius: 10px;
+    padding: 8px 18px;
+    font-size: 16px;
+    font-weight: 500;
+    min-width: 180px;
+    box-shadow: var(--shadow);
+}
+.finance-info-icon {
+    width: 28px;
+    height: 28px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    background: #e8e8ed;
+    margin-right: 4px;
+}
+.finance-info-icon.budget { background: #0071e3; }
+.finance-info-icon.income { background: #34c759; }
+.finance-info-icon.expense { background: #ff3b30; }
+.finance-info-icon.rest { background: #ffd600; }
+.finance-info-icon.lack { background: #ff9500; }
+.finance-info-icon.economy { background: #30d158; }
+.finance-info-label {
+    font-size: 15px;
+    color: var(--text-primary);
+    font-weight: 500;
+}
+.finance-info-value {
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-left: auto;
+}
     display: flex;
     flex-wrap: wrap;
     gap: 24px;

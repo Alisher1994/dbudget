@@ -34,7 +34,7 @@ function renderFinanceChart(ctx, role) {
     if (financeLegendDiv) {
         financeLegendDiv.innerHTML = labels.map((l, i) => `<span class=\"chart-legend-item\"><span class=\"chart-legend-color\" style=\"background:${colors[i]}\"></span>${l}</span>`).join('');
     }
-    // Горизонтальный bar chart: каждая категория — отдельная строка
+    // Горизонтальный bar chart: чуть скруглённые, прямоугольные линии
     new Chart(ctx, {
         type: 'bar',
         data: {
@@ -42,7 +42,7 @@ function renderFinanceChart(ctx, role) {
             datasets: [{
                 data: data,
                 backgroundColor: colors,
-                borderRadius: 18,
+                borderRadius: 7,
                 borderSkipped: false,
                 barPercentage: 0.7,
                 categoryPercentage: 0.7,
@@ -120,7 +120,7 @@ function renderResourceColumnChart(ctx, label, plan, fact, i) {
                 label,
                 data: [plan, fact],
                 backgroundColor: ['#0071e3', '#34c759'],
-                borderRadius: 8
+                borderRadius: 7
             }]
         },
         options: {
