@@ -8,11 +8,12 @@ const bcrypt = require('bcrypt');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// Подключение к базе данных - используем приватный URL если доступен
-const databaseUrl = process.env.DATABASE_PRIVATE_URL || process.env.DATABASE_URL;
+// Подключение к базе данных
 const pool = new Pool({
-  connectionString: databaseUrl,
-  ssl: databaseUrl && databaseUrl.includes('railway') ? { rejectUnauthorized: false } : false
+  connectionString: process.env.DATABASE_URL,
+  ssl: process.env.DATABASE_URL && process.env.DATABASE_URL.includes('railway') 
+    ? { rejectUnauthorized: false } 
+    : false
 });
 
 // Инициализация базы данных
