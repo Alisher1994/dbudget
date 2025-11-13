@@ -377,19 +377,22 @@ function setupEventListeners() {
         if (savedData.length === 0) {
             incomeTableBody.innerHTML = '<tr><td colspan="7" class="empty-state">Нет данных</td></tr>';
             incomeCardsMobile.innerHTML = '<div class="empty-state">Нет данных</div>';
+            console.log('Нет данных для отображения');
             return;
         }
+        
+        console.log('Начинаем рендеринг данных:', savedData.length, 'записей');
         
         // Рендерим таблицу для десктопа (всегда, для всех данных)
         savedData.forEach((data, index) => {
             const newRow = document.createElement('tr');
             newRow.innerHTML = `
                 <td>${index + 1}</td>
-                <td>${data.date}</td>
+                <td>${data.date || '—'}</td>
                 <td>${data.photo ? `<img src="${data.photo}" alt="Фото" class="income-photo-preview">` : 'Нет фото'}</td>
                 <td>${formatMoney(data.amount)}</td>
-                <td>${data.sender}</td>
-                <td>${data.receiver}</td>
+                <td>${data.sender || '—'}</td>
+                <td>${data.receiver || '—'}</td>
                 <td>
                     ${showActions ? `
                         <button class="edit-btn edit-income">Изменить</button>
@@ -400,6 +403,9 @@ function setupEventListeners() {
             incomeTableBody.appendChild(newRow);
         });
         
+        console.log('Таблица отрендерена, строк:', incomeTableBody.children.length);
+        console.log('Таблица видима?', incomeTableDesktop ? incomeTableDesktop.style.display : 'элемент не найден');
+        
         // Рендерим карточки (всегда, для всех данных)
         incomeCardsMobile.innerHTML = savedData.map((data, index) => {
             const photoUrl = data.photo || '';
@@ -407,7 +413,7 @@ function setupEventListeners() {
                 <div class="income-card">
                     ${photoUrl ? `<img src="${photoUrl}" alt="Фото" class="income-card-image" data-photo-src="${photoUrl}" data-photo-date="${data.date}" data-photo-sender="${data.sender}" data-photo-amount="${data.amount}">` : ''}
                     <div class="income-card-content">
-                        <div class="income-card-date">${data.date}</div>
+                        <div class="income-card-date">${data.date || '—'}</div>
                         <div class="income-card-amount">${formatMoney(data.amount)}</div>
                         <div class="income-card-info">
                             <div class="income-card-info-item">
@@ -423,6 +429,9 @@ function setupEventListeners() {
                 </div>
             `;
         }).join('');
+        
+        console.log('Карточки отрендерены, количество:', incomeCardsMobile.children.length);
+        console.log('Карточки видимы?', incomeCardsMobile.style.display, 'класс show:', incomeCardsMobile.classList.contains('show'));
         
         // Добавляем обработчики клика на фото в карточках
         incomeCardsMobile.querySelectorAll('.income-card-image').forEach(img => {
