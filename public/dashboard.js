@@ -122,10 +122,11 @@ function renderObjects() {
     tbody.innerHTML = currentObjects.map(obj => {
         const remaining = (obj.budget || 0) - (obj.spent || 0);
         const isAdmin = currentUser.role === 'admin';
+        const photoHtml = obj.photo ? `<img src="${obj.photo}" alt="${obj.name}" style="width: 50px; height: 50px; object-fit: cover; border-radius: 6px; margin-right: 8px; vertical-align: middle;">` : '';
         
         return `
             <tr>
-                <td><strong>${obj.name}</strong></td>
+                <td>${photoHtml}<strong>${obj.name}</strong></td>
                 <td>${obj.address || '—'}</td>
                 <td>${formatMoney(obj.budget)}</td>
                 <td>${formatMoney(obj.spent)}</td>
@@ -169,6 +170,7 @@ function editObject(id) {
     document.getElementById('objectModalTitle').textContent = 'Редактировать объект';
     document.getElementById('objectName').value = obj.name;
     document.getElementById('objectAddress').value = obj.address || '';
+    document.getElementById('objectPhoto').value = obj.photo || '';
     document.getElementById('objectBudget').value = obj.budget || 0;
     document.getElementById('objectSpent').value = obj.spent || 0;
     document.getElementById('objectClient').value = obj.client_id || '';
@@ -184,6 +186,7 @@ async function handleObjectSubmit(e) {
     const data = {
         name: document.getElementById('objectName').value,
         address: document.getElementById('objectAddress').value,
+        photo: document.getElementById('objectPhoto').value,
         budget: parseFloat(document.getElementById('objectBudget').value) || 0,
         spent: parseFloat(document.getElementById('objectSpent').value) || 0,
         client_id: document.getElementById('objectClient').value || null
@@ -241,7 +244,7 @@ function renderUsers() {
     const tbody = document.getElementById('usersTableBody');
     
     if (currentUsers.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="4" class="empty-state">Нет пользователей</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="5" class="empty-state">Нет пользователей</td></tr>';
         return;
     }
 
@@ -256,6 +259,7 @@ function renderUsers() {
                         ${user.role === 'admin' ? 'Администратор' : 'Клиент'}
                     </span>
                 </td>
+                <td>${user.phone || '—'}</td>
                 <td>${formatDate(user.created_at)}</td>
                 <td class="actions-col">
                     <div class="table-actions">
@@ -275,6 +279,7 @@ async function handleUserSubmit(e) {
     const data = {
         username: document.getElementById('userLogin').value,
         password: document.getElementById('userPassword').value,
+        phone: document.getElementById('userPhone').value,
         role: document.getElementById('userRole').value
     };
 
