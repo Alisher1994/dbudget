@@ -14,12 +14,6 @@
                 <span id="userName"></span>
                 <button id="logoutBtn" class="btn btn-secondary">Выйти</button>
             </div>
-            <button id="accountMenuBtn" class="account-btn-mobile">
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
-                    <circle cx="12" cy="7" r="4"></circle>
-                </svg>
-            </button>
         </header>
 
         <!-- Мобильное меню аккаунта -->
@@ -45,15 +39,23 @@
         </div>
 
         <nav class="tabs">
-            <button class="tab-button active" data-tab="objects">Объекты</button>
-            <button class="tab-button" data-tab="users" id="usersTab">Пользователи</button>
+            <div class="tabs-container">
+                <button class="tab-button active" data-tab="objects">Объекты</button>
+                <button class="tab-button" data-tab="users" id="usersTab">Пользователи</button>
+            </div>
+            <button id="accountMenuBtn" class="account-btn-mobile">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                    <circle cx="12" cy="7" r="4"></circle>
+                </svg>
+            </button>
         </nav>
 
         <main class="content">
             <!-- Вкладка Объекты -->
             <div id="objects-tab" class="tab-content active">
                 <div class="tab-header">
-                    <h2>Объекты</h2>
+                    <h2 class="desktop-only">Объекты</h2>
                     <button id="addObjectBtn" class="btn btn-primary" style="display: none;">+ Добавить объект</button>
                 </div>
 
@@ -87,9 +89,11 @@
 
             <!-- Детальная страница объекта -->
             <div id="object-detail-tab" class="tab-content">
-                <div class="tab-header">
-                    <button id="backToObjectsBtn" class="btn btn-secondary">← Назад к объектам</button>
-                    <h2 id="objectDetailTitle">Объект</h2>
+                <div class="detail-header">
+                    <div class="detail-header-top">
+                        <button id="backToObjectsBtn" class="btn-back">←</button>
+                        <h2 id="objectDetailTitle" class="detail-title">Объект</h2>
+                    </div>
                 </div>
 
                 <nav class="sub-tabs">
