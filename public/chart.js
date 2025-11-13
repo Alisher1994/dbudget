@@ -94,6 +94,69 @@ function renderResourceColumnChart(ctx, label, plan, fact, i) {
     });
 }
 
+function renderResourceGaugeChart(ctx, label, plan, fact, i) {
+    const over = fact > plan;
+    const factColor = over ? '#ff9500' : '#34c759';
+    const planColor = '#e0e0e0';
+    // Сумма и название
+    const sumDiv = document.getElementById('resourceSum' + i);
+    if (sumDiv) {
+        sumDiv.textContent = formatSum(fact) + ' / ' + formatSum(plan);
+    }
+    const labelDiv = document.getElementById('resourceLabel' + i);
+    if (labelDiv) {
+        labelDiv.textContent = label;
+    }
+    // Легенда
+    const legendDiv = document.getElementById('resourceLegend' + i);
+    if (legendDiv) {
+        legendDiv.innerHTML = `<span class=\"chart-legend-item\"><span class=\"chart-legend-color\" style=\"background:${planColor}\"></span>План</span><span class=\"chart-legend-item\"><span class=\"chart-legend-color\" style=\"background:${factColor}\"></span>Факт</span>`;
+    }
+    // Gauge chart
+    new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+            labels: ['Факт', 'План'],
+            datasets: [{
+                data: [Math.min(fact, plan), Math.max(plan - fact, 0)],
+                backgroundColor: [factColor, planColor],
+                borderWidth: 0,
+                cutout: '70%',
+                circumference: 180,
+                rotation: 270
+            }]
+        },
+        options: {
+            plugins: {
+                legend: { display: false },
+                tooltip: { enabled: false },
+            },
+            responsive: true,
+            aspectRatio: 2,
+            animation: false,
+        },
+        plugins: [{
+            id: 'centerText',
+            afterDraw: chart => {
+                const { ctx, chartArea } = chart;
+                ctx.save();
+                ctx.font = 'bold 20px Segoe UI';
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillStyle = over ? '#ff9500' : '#34c759';
+                ctx.fillText(formatSum(fact), chart.width / 2, chart.height / 2 - 10);
+                ctx.font = '14px Segoe UI';
+                ctx.fillStyle = '#888';
+                ctx.fillText('Факт', chart.width / 2, chart.height / 2 + 16);
+                ctx.font = 'bold 15px Segoe UI';
+                ctx.fillStyle = '#222';
+                ctx.fillText(label, chart.width / 2, chart.height / 2 - 38);
+                ctx.restore();
+            }
+        }]
+    });
+}
+
 window.renderAnalysisCharts = function(role) {
     // Финансы
     const financeCtx = document.getElementById('financeBarChart').getContext('2d');
@@ -112,6 +175,6 @@ window.renderAnalysisCharts = function(role) {
     ];
     resources.forEach((res, i) => {
         const ctx = document.getElementById('resourceChart' + i).getContext('2d');
-        renderResourceColumnChart(ctx, res.label, res.plan, res.fact, i);
+        renderResourceGaugeChart(ctx, res.label, res.plan, res.fact, i);
     });
 };
