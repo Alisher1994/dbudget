@@ -370,6 +370,18 @@ body {
     color: var(--text-primary);
 }
 
+/* Ensure modal close control (span or button) shows as plain 'x' without frame */
+.modal .close {
+    background: none;
+    border: none;
+    padding: 0;
+    margin: 0;
+    width: auto;
+    height: auto;
+    display: inline-block;
+    line-height: 1;
+}
+
 .modal form {
     padding: 24px;
 }
