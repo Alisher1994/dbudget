@@ -196,6 +196,88 @@ function renderResourceGaugeChart(ctx, label, plan, fact, i) {
     }
 }
 
+function renderResourceChart(ctx, label, plan, fact) {
+    // Две отдельные горизонтальные линии: план (серый), факт (цветной)
+    new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: [label, label],
+            datasets: [
+                {
+                    data: [plan, 0],
+                    backgroundColor: '#e0e0e0',
+                    borderRadius: { topLeft: 7, topRight: 7, bottomLeft: 0, bottomRight: 0 },
+                    barPercentage: 0.7,
+                    categoryPercentage: 0.7,
+                    maxBarThickness: 18,
+                },
+                {
+                    data: [0, fact],
+                    backgroundColor: '#34c759',
+                    borderRadius: { topLeft: 0, topRight: 0, bottomLeft: 7, bottomRight: 7 },
+                    barPercentage: 0.7,
+                    categoryPercentage: 0.7,
+                    maxBarThickness: 18,
+                }
+            ]
+        },
+        options: {
+            indexAxis: 'y',
+            plugins: {
+                legend: { display: false },
+                title: { display: false },
+                datalabels: { display: false }
+            },
+            responsive: true,
+            aspectRatio: 3.5,
+            animation: false,
+            scales: {
+                x: {
+                    beginAtZero: true,
+                    grid: { display: false },
+                    ticks: { display: false }
+                },
+                y: {
+                    grid: { display: false },
+                    ticks: { display: false }
+                }
+            }
+        },
+        plugins: [{
+            id: 'barLabels',
+            afterDatasetsDraw: chart => {
+                const { ctx, data } = chart;
+                // План (верхняя линия)
+                const planMeta = chart.getDatasetMeta(0);
+                if (planMeta.data[0]) {
+                    const bar = planMeta.data[0];
+                    const value = formatSum(data.datasets[0].data[0]);
+                    ctx.save();
+                    ctx.font = '12px Segoe UI';
+                    ctx.textAlign = 'center';
+                    ctx.textBaseline = 'middle';
+                    ctx.fillStyle = '#555';
+                    ctx.fillText(value, bar.x, bar.y);
+                    ctx.restore();
+                }
+                // Факт (нижняя линия)
+                const factMeta = chart.getDatasetMeta(1);
+                if (factMeta.data[1]) {
+                    const bar = factMeta.data[1];
+                    const value = formatSum(data.datasets[1].data[1]);
+                    ctx.save();
+                    ctx.font = '12px Segoe UI';
+                    ctx.textAlign = 'center';
+                    ctx.textBaseline = 'middle';
+                    ctx.fillStyle = '#fff';
+                    ctx.fillText(value, bar.x, bar.y);
+                    ctx.restore();
+                }
+            }
+        }]
+    });
+}
+
 window.renderAnalysisCharts = function(role) {
     // Финансы
     const financeCtx = document.getElementById('financeBarChart').getContext('2d');
