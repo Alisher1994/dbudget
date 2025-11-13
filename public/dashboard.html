@@ -368,13 +368,13 @@
                     <label for="incomeDate">Дата</label>
                     <input type="date" id="incomeDate" class="form-control">
                 </div>
-                <!-- Фото теперь загружаются в строке таблицы; здесь показываем превью при редактировании -->
                 <div class="form-group">
-                    <label>Текущее фото</label>
-                    <div style="display:flex;align-items:center;gap:12px;">
-                        <img src="" alt="Превью" class="photo-preview" style="display:none;width:64px;height:64px;object-fit:cover;border-radius:6px;box-shadow:var(--shadow)">
-                        <span class="photo-preview-text" style="color:var(--text-secondary);font-size:13px">Фото загружается отдельно в таблице</span>
+                    <label for="incomePhoto">Фото</label>
+                    <div id="incomePhotoDropzone" class="photo-dropzone">
+                        <img src="" alt="Превью" class="photo-preview" style="display:none;">
+                        <div class="photo-drop-instructions">Перетащите фото сюда или нажмите, чтобы выбрать</div>
                     </div>
+                    <input type="file" id="incomePhoto" class="form-control" accept="image/*" style="display:none;">
                 </div>
                 <div class="form-group">
                     <label for="incomeAmount">Сумма</label>

@@ -1030,6 +1030,34 @@ body {
     vertical-align: middle;
 }
 
+/* Dropzone в модалке добавления прихода */
+.photo-dropzone {
+    border: 2px dashed var(--border-color);
+    border-radius: 10px;
+    padding: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    cursor: pointer;
+    background: linear-gradient(180deg, rgba(0,0,0,0.02), transparent);
+}
+.photo-dropzone.dragover {
+    border-color: var(--accent-color);
+    background: rgba(0,113,227,0.04);
+}
+.photo-dropzone .photo-preview {
+    width: 120px;
+    height: 80px;
+    object-fit: cover;
+    border-radius: 8px;
+    box-shadow: var(--shadow);
+}
+.photo-drop-instructions {
+    color: var(--text-secondary);
+    font-size: 14px;
+}
+
 button.edit-btn, button.delete-btn {
     height: 40px;
     font-size: 14px;
