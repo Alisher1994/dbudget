@@ -558,6 +558,23 @@ body {
     font-weight: 600;
     margin-bottom: 16px;
 }
+.analysis-sums-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 24px;
+    margin-bottom: 8px;
+    font-size: 15px;
+    font-weight: 500;
+    color: var(--text-primary);
+}
+.analysis-sum-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    background: var(--bg-secondary);
+    border-radius: 8px;
+    padding: 4px 12px;
+}
 .analysis-chart-container {
     background: var(--bg-primary);
     border-radius: 12px;
@@ -565,9 +582,27 @@ body {
     padding: 24px;
     margin-bottom: 16px;
 }
+.chart-legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 16px;
+    margin-top: 12px;
+    font-size: 13px;
+}
+.chart-legend-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+.chart-legend-color {
+    width: 16px;
+    height: 16px;
+    border-radius: 4px;
+    display: inline-block;
+}
 .resource-charts-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    grid-template-columns: repeat(3, 1fr);
     gap: 16px;
 }
 .resource-chart-item {
@@ -576,8 +611,37 @@ body {
     box-shadow: var(--shadow);
     padding: 16px;
     display: flex;
+    flex-direction: column;
     align-items: center;
-    justify-content: center;
+    justify-content: flex-start;
+}
+.resource-chart-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    margin-bottom: 8px;
+    gap: 8px;
+}
+.resource-label {
+    font-size: 15px;
+    font-weight: 500;
+    color: var(--text-primary);
+}
+.resource-sum {
+    font-size: 14px;
+    color: var(--accent-color);
+    font-weight: 600;
+}
+@media (max-width: 900px) {
+    .resource-charts-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+@media (max-width: 600px) {
+    .resource-charts-grid {
+        grid-template-columns: 1fr;
+    }
 }
 
 /* Мобильное меню аккаунта */
