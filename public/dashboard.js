@@ -135,25 +135,36 @@ function setupEventListeners() {
         alert('Данные сохранены!');
     };
 
+    const deleteIncomeData = (rowIndex) => {
+        const savedData = JSON.parse(localStorage.getItem('incomeData')) || [];
+        savedData.splice(rowIndex, 1);
+        localStorage.setItem('incomeData', JSON.stringify(savedData));
+        loadIncomeData();
+    };
+
     incomeTableBody.addEventListener('click', (event) => {
-        if (event.target.classList.contains('save-income')) {
-            const row = event.target.closest('tr');
-            saveIncomeData(row);
+        if (event.target.classList.contains('delete-income')) {
+            const rowIndex = event.target.closest('tr').rowIndex - 1; // Учитываем заголовок таблицы
+            deleteIncomeData(rowIndex);
         }
     });
 
     const loadIncomeData = () => {
+        incomeTableBody.innerHTML = '';
         const savedData = JSON.parse(localStorage.getItem('incomeData')) || [];
         savedData.forEach((data, index) => {
             const newRow = document.createElement('tr');
             newRow.innerHTML = `
                 <td>${index + 1}</td>
                 <td>${data.date}</td>
-                <td>${data.photo}</td>
+                <td>${data.photo ? `<img src="${data.photo}" alt="Фото" class="income-photo-preview">` : 'Нет фото'}</td>
                 <td>${data.amount}</td>
                 <td>${data.sender}</td>
                 <td>${data.receiver}</td>
-                <td><button class="btn btn-primary save-income">Сохранить</button></td>
+                <td>
+                    <button class="btn btn-primary edit-income">Изменить</button>
+                    <button class="btn btn-danger delete-income">Удалить</button>
+                </td>
             `;
             incomeTableBody.appendChild(newRow);
         });

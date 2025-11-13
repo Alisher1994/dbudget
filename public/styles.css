@@ -1005,3 +1005,10 @@ body {
 .income-table tr:last-child td {
     border-bottom: none;
 }
+.income-photo-preview {
+    width: 48px;
+    height: 48px;
+    object-fit: cover;
+    border-radius: 8px;
+    box-shadow: var(--shadow);
+}
