@@ -12,6 +12,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     
     if (currentUser.role === 'admin') {
         await loadUsers();
+        document.getElementById('addObjectBtn').style.display = 'block';
     } else {
         document.getElementById('usersTab').classList.add('hidden');
     }
