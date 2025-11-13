@@ -3,33 +3,6 @@ let currentUser = null;
 let currentObjects = [];
 let currentUsers = [];
 let editingObjectId = null;
-// Глобальная функция рендера приходов (доступна везде)
-window.loadIncomeData = function() {
-    const incomeTableBody = document.getElementById('incomeTableBody');
-    if (!incomeTableBody) return;
-    incomeTableBody.innerHTML = '';
-    const savedData = JSON.parse(localStorage.getItem('incomeData')) || [];
-    // Если открыт конкретный объект, фильтруем записи по object_id
-    const filtered = typeof currentObjectId !== 'undefined' && currentObjectId !== null
-        ? savedData.filter(d => (d.object_id || null) == currentObjectId)
-        : savedData;
-    filtered.forEach((data, index) => {
-        const newRow = document.createElement('tr');
-        newRow.innerHTML = `
-            <td>${index + 1}</td>
-            <td>${data.date}</td>
-            <td>${data.photo ? `<img src="${data.photo}" alt="Фото" class="income-photo-preview">` : 'Нет фото'}</td>
-            <td>${data.amount}</td>
-            <td>${data.sender}</td>
-            <td>${data.receiver}</td>
-            <td>
-                <button class="edit-btn edit-income">Изменить</button>
-                <button class="delete-btn delete-income">Удалить</button>
-            </td>
-        `;
-        incomeTableBody.appendChild(newRow);
-    });
-};
 
 // Инициализация
 document.addEventListener('DOMContentLoaded', async () => {
@@ -297,10 +270,28 @@ function setupEventListeners() {
         }
     });
 
-    // Заменяем локальную версию на глобальную функцию
-    window.loadIncomeData = window.loadIncomeData || window.loadIncomeData;
-    // Вызовем глобальную функцию для первоначальной загрузки данных
-    window.loadIncomeData();
+    const loadIncomeData = () => {
+        incomeTableBody.innerHTML = '';
+        const savedData = JSON.parse(localStorage.getItem('incomeData')) || [];
+        savedData.forEach((data, index) => {
+            const newRow = document.createElement('tr');
+            newRow.innerHTML = `
+                <td>${index + 1}</td>
+                <td>${data.date}</td>
+                <td>${data.photo ? `<img src="${data.photo}" alt="Фото" class="income-photo-preview">` : 'Нет фото'}</td>
+                <td>${data.amount}</td>
+                <td>${data.sender}</td>
+                <td>${data.receiver}</td>
+                <td>
+                    <button class="edit-btn edit-income">Изменить</button>
+                    <button class="delete-btn delete-income">Удалить</button>
+                </td>
+            `;
+            incomeTableBody.appendChild(newRow);
+        });
+    };
+
+    loadIncomeData();
 }
 
 function setupModal(modalId, openBtnId, closeBtnId, formId, submitHandler) {
@@ -708,9 +699,9 @@ function openObjectDetail(objectId) {
         if (window.renderAnalysisCharts) {
             window.renderAnalysisCharts(currentUser.role);
         }
+        // Обновляем таблицу прихода для мобильного клиента
+        if (typeof loadIncomeData === 'function') loadIncomeData();
     }, 300);
-    // Обновим таблицу прихода для текущего объекта (важно для мобильного)
-    if (window.loadIncomeData) window.loadIncomeData();
 }
 
 // Обработчик кнопки "Назад"
