@@ -58,8 +58,15 @@ function renderFinanceChart(ctx, role) {
             // ignore parsing errors
         }
     }
+    // Убедимся, что старый чарт уничтожен перед созданием нового
+    window.__charts = window.__charts || {};
+    if (window.__charts.finance) {
+        try { window.__charts.finance.destroy(); } catch (e) { /* ignore */ }
+        window.__charts.finance = null;
+    }
+
     // Горизонтальный bar chart: чуть скруглённые, прямоугольные линии
-    new Chart(ctx, {
+    const financeChart = new Chart(ctx, {
         type: 'bar',
         data: {
             labels: labels,
@@ -117,6 +124,7 @@ function renderFinanceChart(ctx, role) {
             }
         }]
     });
+    window.__charts.finance = financeChart;
 }
 
 // Ресурсный анализ
@@ -136,7 +144,12 @@ function renderResourceColumnChart(ctx, label, plan, fact, i) {
     if (legendDiv) {
         legendDiv.innerHTML = `<span class="chart-legend-item"><span class="chart-legend-color" style="background:#0071e3"></span>План</span><span class="chart-legend-item"><span class="chart-legend-color" style="background:#34c759"></span>Факт</span>`;
     }
-    new Chart(ctx, {
+    window.__charts = window.__charts || {};
+    if (window.__charts['resource' + i]) {
+        try { window.__charts['resource' + i].destroy(); } catch (e) {}
+        window.__charts['resource' + i] = null;
+    }
+    const rc = new Chart(ctx, {
         type: 'bar',
         data: {
             labels: ['План', 'Факт'],
@@ -153,6 +166,7 @@ function renderResourceColumnChart(ctx, label, plan, fact, i) {
             scales: { x: { grid: { display: false } }, y: { beginAtZero: true } }
         }
     });
+    window.__charts['resource' + i] = rc;
 }
 
 function renderResourceGaugeChart(ctx, label, plan, fact, i) {
@@ -160,7 +174,12 @@ function renderResourceGaugeChart(ctx, label, plan, fact, i) {
     const factColor = over ? '#ff9500' : '#34c759';
     const planColor = '#e0e0e0';
     // Название сверху
-    new Chart(ctx, {
+    window.__charts = window.__charts || {};
+    if (window.__charts['resource' + i]) {
+        try { window.__charts['resource' + i].destroy(); } catch (e) {}
+        window.__charts['resource' + i] = null;
+    }
+    const gauge = new Chart(ctx, {
         type: 'bar',
         data: {
             labels: [''],
@@ -213,6 +232,7 @@ function renderResourceGaugeChart(ctx, label, plan, fact, i) {
             }
         }
     });
+    window.__charts['resource' + i] = gauge;
     // Суммы под чартом
     const sumBlock = document.getElementById('resourceSumsBlock' + i);
     if (sumBlock) {
@@ -222,7 +242,13 @@ function renderResourceGaugeChart(ctx, label, plan, fact, i) {
 
 function renderResourceChart(ctx, labels, data) {
     const colors = ['#0071e3', '#34c759', '#ff3b30', '#ffd600', '#ff9500', '#30d158'];
-    new Chart(ctx, {
+    // generic resource chart without index: try best-effort destroy if canvas has a chart
+    try {
+        const chartAtCanvas = Chart.getChart(ctx.canvas);
+        if (chartAtCanvas) chartAtCanvas.destroy();
+    } catch (e) {}
+
+    const rchart = new Chart(ctx, {
         type: 'bar',
         data: {
             labels: labels,
@@ -259,6 +285,7 @@ function renderResourceChart(ctx, labels, data) {
             }
         }
     });
+    // do not store generic charts globally
 }
 
 window.renderAnalysisCharts = function(role) {
