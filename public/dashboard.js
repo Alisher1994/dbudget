@@ -180,7 +180,7 @@ function setupEventListeners() {
 
         alert('Данные сохранены!');
         incomeModal.classList.remove('active');
-        loadIncomeData();
+        if (window.loadIncomeData) window.loadIncomeData();
         if (window.renderAnalysisCharts) window.renderAnalysisCharts(currentUser?.role || 'admin');
     });
 
@@ -211,7 +211,7 @@ function setupEventListeners() {
         const savedData = JSON.parse(localStorage.getItem('incomeData')) || [];
         savedData.splice(rowIndex, 1);
         localStorage.setItem('incomeData', JSON.stringify(savedData));
-        loadIncomeData();
+        if (window.loadIncomeData) window.loadIncomeData();
         if (window.renderAnalysisCharts) window.renderAnalysisCharts(currentUser?.role || 'admin');
     };
 
@@ -270,28 +270,150 @@ function setupEventListeners() {
         }
     });
 
-    const loadIncomeData = () => {
+    // Делаем loadIncomeData доступной глобально
+    window.loadIncomeData = () => {
+        const incomeTableBody = document.getElementById('incomeTableBody');
+        const incomeCardsMobile = document.getElementById('incomeCardsMobile');
+        if (!incomeTableBody || !incomeCardsMobile) return;
+        
         incomeTableBody.innerHTML = '';
-        const savedData = JSON.parse(localStorage.getItem('incomeData')) || [];
+        let savedData = JSON.parse(localStorage.getItem('incomeData')) || [];
+        
+        // Фильтруем данные для клиентов
+        if (currentUser && currentUser.role === 'client') {
+            if (currentObjectId) {
+                // Если клиент на странице объекта, показываем только данные этого объекта
+                const currentObj = currentObjects.find(o => o.id == currentObjectId);
+                if (currentObj) {
+                    savedData = savedData.filter(i => {
+                        // Фильтруем по object_id
+                        if ((i.object_id || null) == currentObjectId) return true;
+                        // Если объект имеет назначенного клиента, проверяем совпадение по имени
+                        if (currentObj.client_name) {
+                            const name = (currentObj.client_name || '').toString().toLowerCase();
+                            if ((i.sender || '').toString().toLowerCase().includes(name)) return true;
+                            if ((i.receiver || '').toString().toLowerCase().includes(name)) return true;
+                        }
+                        // Проверяем по username клиента
+                        if (currentUser.username) {
+                            const uname = currentUser.username.toString().toLowerCase();
+                            if ((i.sender || '').toString().toLowerCase().includes(uname)) return true;
+                            if ((i.receiver || '').toString().toLowerCase().includes(uname)) return true;
+                        }
+                        return false;
+                    });
+                }
+            } else {
+                // Если клиент не на странице объекта, показываем все его данные
+                if (currentUser.username) {
+                    const uname = currentUser.username.toString().toLowerCase();
+                    savedData = savedData.filter(i => {
+                        if ((i.sender || '').toString().toLowerCase().includes(uname)) return true;
+                        if ((i.receiver || '').toString().toLowerCase().includes(uname)) return true;
+                        // Также проверяем по объектам клиента
+                        const userObjects = currentObjects.filter(o => o.client_id == currentUser.id);
+                        return userObjects.some(obj => {
+                            if ((i.object_id || null) == obj.id) return true;
+                            if (obj.client_name) {
+                                const name = (obj.client_name || '').toString().toLowerCase();
+                                if ((i.sender || '').toString().toLowerCase().includes(name)) return true;
+                                if ((i.receiver || '').toString().toLowerCase().includes(name)) return true;
+                            }
+                            return false;
+                        });
+                    });
+                }
+            }
+        }
+        
+        // Определяем, показывать ли кнопки редактирования/удаления
+        const isClient = currentUser && currentUser.role === 'client';
+        const showActions = !isClient;
+        
+        // Скрываем/показываем кнопку добавления
+        const addIncomeBtn = document.getElementById('addIncomeBtn');
+        if (addIncomeBtn) {
+            addIncomeBtn.style.display = isClient ? 'none' : 'block';
+        }
+        
+        // Рендерим таблицу для десктопа
+        if (savedData.length === 0) {
+            incomeTableBody.innerHTML = '<tr><td colspan="7" class="empty-state">Нет данных</td></tr>';
+            incomeCardsMobile.innerHTML = '<div class="empty-state">Нет данных</div>';
+            return;
+        }
+        
         savedData.forEach((data, index) => {
             const newRow = document.createElement('tr');
             newRow.innerHTML = `
                 <td>${index + 1}</td>
                 <td>${data.date}</td>
                 <td>${data.photo ? `<img src="${data.photo}" alt="Фото" class="income-photo-preview">` : 'Нет фото'}</td>
-                <td>${data.amount}</td>
+                <td>${formatMoney(data.amount)}</td>
                 <td>${data.sender}</td>
                 <td>${data.receiver}</td>
                 <td>
-                    <button class="edit-btn edit-income">Изменить</button>
-                    <button class="delete-btn delete-income">Удалить</button>
+                    ${showActions ? `
+                        <button class="edit-btn edit-income">Изменить</button>
+                        <button class="delete-btn delete-income">Удалить</button>
+                    ` : '—'}
                 </td>
             `;
             incomeTableBody.appendChild(newRow);
         });
+        
+        // Рендерим карточки для мобильных
+        incomeCardsMobile.innerHTML = savedData.map((data, index) => {
+            const photoUrl = data.photo || '';
+            return `
+                <div class="income-card">
+                    ${photoUrl ? `<img src="${photoUrl}" alt="Фото" class="income-card-image" data-photo-src="${photoUrl}" data-photo-date="${data.date}" data-photo-sender="${data.sender}" data-photo-amount="${data.amount}">` : ''}
+                    <div class="income-card-content">
+                        <div class="income-card-date">${data.date}</div>
+                        <div class="income-card-amount">${formatMoney(data.amount)}</div>
+                        <div class="income-card-info">
+                            <div class="income-card-info-item">
+                                <span class="income-card-info-label">Кем передан:</span>
+                                <span>${data.sender || '—'}</span>
+                            </div>
+                            <div class="income-card-info-item">
+                                <span class="income-card-info-label">Кто получил:</span>
+                                <span>${data.receiver || '—'}</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }).join('');
+        
+        // Добавляем обработчики клика на фото в карточках
+        incomeCardsMobile.querySelectorAll('.income-card-image').forEach(img => {
+            img.style.cursor = 'pointer';
+            img.addEventListener('click', () => {
+                const photoModal = document.getElementById('photoPreviewModal');
+                const photoImg = document.getElementById('photoPreviewImg');
+                const photoCaption = document.getElementById('photoPreviewCaption');
+                const closeBtn = document.getElementById('closePhotoPreview');
+                
+                if (photoImg) photoImg.src = img.dataset.photoSrc || '';
+                if (photoCaption) {
+                    const date = img.dataset.photoDate || '';
+                    const sender = img.dataset.photoSender || '';
+                    const amount = img.dataset.photoAmount || '';
+                    photoCaption.textContent = `${date} • ${sender} • ${formatMoney(amount)}`;
+                }
+                if (photoModal) photoModal.classList.add('active');
+                
+                // Close handlers
+                if (closeBtn) closeBtn.onclick = () => photoModal.classList.remove('active');
+                if (photoModal) photoModal.onclick = (e) => { 
+                    if (e.target.id === 'photoPreviewModal') photoModal.classList.remove('active'); 
+                };
+            });
+        });
     };
 
-    loadIncomeData();
+    window.loadIncomeData();
 }
 
 function setupModal(modalId, openBtnId, closeBtnId, formId, submitHandler) {
@@ -700,7 +822,7 @@ function openObjectDetail(objectId) {
             window.renderAnalysisCharts(currentUser.role);
         }
         // Обновляем таблицу прихода для мобильного клиента
-        if (typeof loadIncomeData === 'function') loadIncomeData();
+        if (window.loadIncomeData) window.loadIncomeData();
     }, 300);
 }
 
@@ -750,4 +872,9 @@ function switchSubTab(subtabName) {
         content.classList.remove('active');
     });
     document.getElementById(`${subtabName}-subtab`)?.classList.add('active');
+    
+    // Если переключились на вкладку "Приход", загружаем данные
+    if (subtabName === 'income' && window.loadIncomeData) {
+        window.loadIncomeData();
+    }
 }

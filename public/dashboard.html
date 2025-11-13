@@ -175,22 +175,29 @@
                     <div class="income-header">
                         <button id="addIncomeBtn" class="btn btn-primary">+ Добавить</button>
                     </div>
-                    <table class="income-table">
-                        <thead>
-                            <tr>
-                                <th>№</th>
-                                <th>Дата</th>
-                                <th>Фото</th>
-                                <th>Сумма</th>
-                                <th>Кем передан</th>
-                                <th>Кто получил</th>
-                                <th>Сохранить</th>
-                            </tr>
-                        </thead>
-                        <tbody id="incomeTableBody">
-                            <!-- Динамически добавляемые строки -->
-                        </tbody>
-                    </table>
+                    <!-- Таблица для десктопа -->
+                    <div class="table-container income-table-desktop">
+                        <table class="income-table">
+                            <thead>
+                                <tr>
+                                    <th>№</th>
+                                    <th>Дата</th>
+                                    <th>Фото</th>
+                                    <th>Сумма</th>
+                                    <th>Кем передан</th>
+                                    <th>Кто получил</th>
+                                    <th>Сохранить</th>
+                                </tr>
+                            </thead>
+                            <tbody id="incomeTableBody">
+                                <!-- Динамически добавляемые строки -->
+                            </tbody>
+                        </table>
+                    </div>
+                    <!-- Карточки для мобильных -->
+                    <div class="income-cards-mobile" id="incomeCardsMobile">
+                        <div class="empty-state">Загрузка...</div>
+                    </div>
                 </div>
 
                 <!-- Подвкладка Бюджет -->

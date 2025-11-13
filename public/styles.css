@@ -1125,3 +1125,73 @@ button.delete-btn {
     border: none;
     border-radius: 5px;
 }
+
+/* Мобильные карточки прихода */
+.income-cards-mobile {
+    display: none;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.income-card {
+    background: var(--bg-primary);
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: var(--shadow);
+    transition: all 0.2s;
+}
+
+.income-card-image {
+    width: 100%;
+    height: 200px;
+    object-fit: cover;
+    background-color: var(--bg-secondary);
+    display: block;
+}
+
+.income-card-content {
+    padding: 16px;
+}
+
+.income-card-date {
+    font-size: 14px;
+    color: var(--text-secondary);
+    margin-bottom: 8px;
+}
+
+.income-card-amount {
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--accent-color);
+    margin-bottom: 12px;
+}
+
+.income-card-info {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.income-card-info-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 14px;
+    color: var(--text-primary);
+}
+
+.income-card-info-label {
+    font-weight: 600;
+    color: var(--text-secondary);
+    min-width: 100px;
+}
+
+@media (max-width: 768px) {
+    .income-table-desktop {
+        display: none;
+    }
+
+    .income-cards-mobile {
+        display: flex;
+    }
+}
