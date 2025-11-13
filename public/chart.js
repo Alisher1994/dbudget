@@ -98,21 +98,14 @@ function renderResourceGaugeChart(ctx, label, plan, fact, i) {
     const over = fact > plan;
     const factColor = over ? '#ff9500' : '#34c759';
     const planColor = '#e0e0e0';
-    // Сумма и название
-    const sumDiv = document.getElementById('resourceSum' + i);
-    if (sumDiv) {
-        sumDiv.textContent = formatSum(fact) + ' / ' + formatSum(plan);
-    }
-    const labelDiv = document.getElementById('resourceLabel' + i);
-    if (labelDiv) {
-        labelDiv.textContent = label;
-    }
-    // Легенда
+    // Название сверху (в разметке)
+    // Легенда и суммы под чартом
     const legendDiv = document.getElementById('resourceLegend' + i);
     if (legendDiv) {
-        legendDiv.innerHTML = `<span class=\"chart-legend-item\"><span class=\"chart-legend-color\" style=\"background:${planColor}\"></span>План</span><span class=\"chart-legend-item\"><span class=\"chart-legend-color\" style=\"background:${factColor}\"></span>Факт</span>`;
+        legendDiv.innerHTML = `<span class=\"chart-legend-item\"><span class=\"chart-legend-color\" style=\"background:${planColor}\"></span>План</span><span class=\"chart-legend-item\"><span class=\"chart-legend-color\" style=\"background:${factColor}\"></span>Факт</span>` +
+            `<div class=\"resource-sums-block\"><div class=\"resource-sum\">План: ${formatSum(plan)}</div><div class=\"resource-sum\">Факт: ${formatSum(fact)}</div></div>`;
     }
-    // Gauge chart
+    // Gauge chart без текста внутри
     new Chart(ctx, {
         type: 'doughnut',
         data: {
@@ -134,26 +127,7 @@ function renderResourceGaugeChart(ctx, label, plan, fact, i) {
             responsive: true,
             aspectRatio: 2,
             animation: false,
-        },
-        plugins: [{
-            id: 'centerText',
-            afterDraw: chart => {
-                const { ctx, chartArea } = chart;
-                ctx.save();
-                ctx.font = 'bold 20px Segoe UI';
-                ctx.textAlign = 'center';
-                ctx.textBaseline = 'middle';
-                ctx.fillStyle = over ? '#ff9500' : '#34c759';
-                ctx.fillText(formatSum(fact), chart.width / 2, chart.height / 2 - 10);
-                ctx.font = '14px Segoe UI';
-                ctx.fillStyle = '#888';
-                ctx.fillText('Факт', chart.width / 2, chart.height / 2 + 16);
-                ctx.font = 'bold 15px Segoe UI';
-                ctx.fillStyle = '#222';
-                ctx.fillText(label, chart.width / 2, chart.height / 2 - 38);
-                ctx.restore();
-            }
-        }]
+        }
     });
 }
 

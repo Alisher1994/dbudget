@@ -617,7 +617,7 @@ body {
 }
 .resource-chart-header {
     display: flex;
-    justify-content: space-between;
+    justify-content: flex-end;
     align-items: center;
     width: 100%;
     margin-bottom: 8px;
@@ -627,11 +627,16 @@ body {
     font-size: 15px;
     font-weight: 500;
     color: var(--text-primary);
+    margin-left: auto;
 }
-.resource-sum {
+.resource-sums-block {
+    margin-top: 8px;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
     font-size: 14px;
-    color: var(--accent-color);
-    font-weight: 600;
+    color: var(--text-primary);
+    font-weight: 500;
 }
 @media (max-width: 900px) {
     .resource-charts-grid {
