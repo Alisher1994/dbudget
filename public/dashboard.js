@@ -138,6 +138,7 @@ function renderObjects() {
                 <td>${obj.client_name || '—'}</td>
                 <td class="actions-col">
                     <div class="table-actions">
+                        <button class="btn btn-primary btn-small" onclick="openObjectDetail(${obj.id})">Открыть</button>
                         ${isAdmin ? `
                             <button class="btn btn-secondary btn-small" onclick="editObject(${obj.id})">Изменить</button>
                             <button class="btn btn-danger btn-small" onclick="deleteObject(${obj.id})">Удалить</button>
@@ -383,4 +384,78 @@ function formatDate(dateString) {
         month: 'long',
         day: 'numeric'
     });
+}
+
+// ДЕТАЛЬНАЯ СТРАНИЦА ОБЪЕКТА
+let currentObjectId = null;
+
+function openObjectDetail(objectId) {
+    const obj = currentObjects.find(o => o.id === objectId);
+    if (!obj) return;
+
+    currentObjectId = objectId;
+    
+    // Скрываем список объектов и показываем детальную страницу
+    document.getElementById('objects-tab').classList.remove('active');
+    document.getElementById('object-detail-tab').classList.add('active');
+    
+    // Обновляем навигацию
+    document.querySelectorAll('.tab-button').forEach(btn => btn.classList.remove('active'));
+    
+    // Заполняем информацию об объекте
+    document.getElementById('objectDetailTitle').textContent = obj.name;
+    document.getElementById('detailAddress').textContent = obj.address || '—';
+    document.getElementById('detailClient').textContent = obj.client_name || '—';
+    document.getElementById('detailBudget').textContent = formatMoney(obj.budget);
+    document.getElementById('detailSpent').textContent = formatMoney(obj.spent);
+    
+    const remaining = (obj.budget || 0) - (obj.spent || 0);
+    const remainingEl = document.getElementById('detailRemaining');
+    remainingEl.textContent = formatMoney(remaining);
+    remainingEl.style.color = remaining < 0 ? 'var(--danger-color)' : 'var(--success-color)';
+    
+    // Переключаемся на вкладку Анализ
+    switchSubTab('analysis');
+}
+
+// Обработчик кнопки "Назад"
+document.addEventListener('DOMContentLoaded', () => {
+    const backBtn = document.getElementById('backToObjectsBtn');
+    if (backBtn) {
+        backBtn.addEventListener('click', () => {
+            document.getElementById('object-detail-tab').classList.remove('active');
+            document.getElementById('objects-tab').classList.add('active');
+            
+            // Восстанавливаем активную вкладку
+            document.querySelectorAll('.tab-button').forEach(btn => {
+                if (btn.dataset.tab === 'objects') {
+                    btn.classList.add('active');
+                }
+            });
+            
+            currentObjectId = null;
+        });
+    }
+    
+    // Обработчики подвкладок
+    document.querySelectorAll('.sub-tab-button').forEach(button => {
+        button.addEventListener('click', () => {
+            const subtabName = button.dataset.subtab;
+            switchSubTab(subtabName);
+        });
+    });
+});
+
+function switchSubTab(subtabName) {
+    // Переключаем активную кнопку
+    document.querySelectorAll('.sub-tab-button').forEach(btn => {
+        btn.classList.remove('active');
+    });
+    document.querySelector(`[data-subtab="${subtabName}"]`)?.classList.add('active');
+    
+    // Переключаем контент
+    document.querySelectorAll('.sub-tab-content').forEach(content => {
+        content.classList.remove('active');
+    });
+    document.getElementById(`${subtabName}-subtab`)?.classList.add('active');
 }

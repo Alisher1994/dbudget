@@ -51,6 +51,157 @@
                 </div>
             </div>
 
+            <!-- Детальная страница объекта -->
+            <div id="object-detail-tab" class="tab-content">
+                <div class="tab-header">
+                    <button id="backToObjectsBtn" class="btn btn-secondary">← Назад к объектам</button>
+                    <h2 id="objectDetailTitle">Объект</h2>
+                </div>
+
+                <div class="object-info-card">
+                    <div class="object-info-grid">
+                        <div class="info-item">
+                            <span class="info-label">Адрес:</span>
+                            <span id="detailAddress" class="info-value">—</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">Клиент:</span>
+                            <span id="detailClient" class="info-value">—</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">Бюджет:</span>
+                            <span id="detailBudget" class="info-value">—</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">Потрачено:</span>
+                            <span id="detailSpent" class="info-value">—</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">Остаток:</span>
+                            <span id="detailRemaining" class="info-value">—</span>
+                        </div>
+                    </div>
+                </div>
+
+                <nav class="sub-tabs">
+                    <button class="sub-tab-button active" data-subtab="analysis">Анализ</button>
+                    <button class="sub-tab-button" data-subtab="income">Приход</button>
+                    <button class="sub-tab-button" data-subtab="budget">Бюджет</button>
+                    <button class="sub-tab-button" data-subtab="expense">Расход</button>
+                </nav>
+
+                <!-- Подвкладка Анализ -->
+                <div id="analysis-subtab" class="sub-tab-content active">
+                    <div class="subtab-header">
+                        <h3>Анализ объекта</h3>
+                    </div>
+                    <div class="analysis-placeholder">
+                        <p>Здесь будет аналитика по объекту</p>
+                    </div>
+                </div>
+
+                <!-- Подвкладка Приход -->
+                <div id="income-subtab" class="sub-tab-content">
+                    <div class="subtab-header">
+                        <h3>Приход средств</h3>
+                        <button id="addIncomeBtn" class="btn btn-primary">+ Добавить приход</button>
+                    </div>
+                    <div class="table-container">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>Дата</th>
+                                    <th>Описание</th>
+                                    <th>Сумма</th>
+                                    <th class="actions-col">Действия</th>
+                                </tr>
+                            </thead>
+                            <tbody id="incomeTableBody">
+                                <tr>
+                                    <td colspan="4" class="empty-state">Нет записей о приходе</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Подвкладка Бюджет -->
+                <div id="budget-subtab" class="sub-tab-content">
+                    <div class="subtab-header">
+                        <h3>Бюджет</h3>
+                        <button id="addBudgetBtn" class="btn btn-primary">+ Добавить статью</button>
+                    </div>
+                    <div class="table-container">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>Категория</th>
+                                    <th>Запланировано</th>
+                                    <th>Потрачено</th>
+                                    <th>Остаток</th>
+                                    <th class="actions-col">Действия</th>
+                                </tr>
+                            </thead>
+                            <tbody id="budgetTableBody">
+                                <tr>
+                                    <td colspan="5" class="empty-state">Нет статей бюджета</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Подвкладка Расход -->
+                <div id="expense-subtab" class="sub-tab-content">
+                    <div class="subtab-header">
+                        <h3>Расход средств</h3>
+                        <button id="addExpenseBtn" class="btn btn-primary">+ Добавить расход</button>
+                    </div>
+                    <div class="table-container">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>Дата</th>
+                                    <th>Категория</th>
+                                    <th>Описание</th>
+                                    <th>Сумма</th>
+                                    <th class="actions-col">Действия</th>
+                                </tr>
+                            </thead>
+                            <tbody id="expenseTableBody">
+                                <tr>
+                                    <td colspan="5" class="empty-state">Нет записей о расходах</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Вкладка Пользователи -->
+
+                <div class="table-container">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th style="width: 20%;">Название</th>
+                                <th style="width: 20%;">Адрес</th>
+                                <th style="width: 10%;">Бюджет</th>
+                                <th style="width: 10%;">Потрачено</th>
+                                <th style="width: 10%;">Остаток</th>
+                                <th style="width: 15%;">Клиент</th>
+                                <th class="actions-col" style="width: 15%;">Действия</th>
+                            </tr>
+                        </thead>
+                        <tbody id="objectsTableBody">
+                            <tr>
+                                <td colspan="7" class="empty-state">Загрузка...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
             <!-- Вкладка Пользователи -->
             <div id="users-tab" class="tab-content">
                 <div class="tab-header">
