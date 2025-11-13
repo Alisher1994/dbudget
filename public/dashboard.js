@@ -365,86 +365,82 @@ function setupEventListeners() {
             }
         }
         
-        // Рендерим таблицу для десктопа (админ)
+        // Всегда рендерим данные в ОБА контейнера, а показываем нужный через CSS
         if (savedData.length === 0) {
             incomeTableBody.innerHTML = '<tr><td colspan="7" class="empty-state">Нет данных</td></tr>';
             incomeCardsMobile.innerHTML = '<div class="empty-state">Нет данных</div>';
             return;
         }
         
-        // Рендерим таблицу для десктопа (только для админа на десктопе)
-        if (!showCards) {
-            savedData.forEach((data, index) => {
-                const newRow = document.createElement('tr');
-                newRow.innerHTML = `
-                    <td>${index + 1}</td>
-                    <td>${data.date}</td>
-                    <td>${data.photo ? `<img src="${data.photo}" alt="Фото" class="income-photo-preview">` : 'Нет фото'}</td>
-                    <td>${formatMoney(data.amount)}</td>
-                    <td>${data.sender}</td>
-                    <td>${data.receiver}</td>
-                    <td>
-                        ${showActions ? `
-                            <button class="edit-btn edit-income">Изменить</button>
-                            <button class="delete-btn delete-income">Удалить</button>
-                        ` : '—'}
-                    </td>
-                `;
-                incomeTableBody.appendChild(newRow);
-            });
-        }
+        // Рендерим таблицу для десктопа (всегда, для всех данных)
+        savedData.forEach((data, index) => {
+            const newRow = document.createElement('tr');
+            newRow.innerHTML = `
+                <td>${index + 1}</td>
+                <td>${data.date}</td>
+                <td>${data.photo ? `<img src="${data.photo}" alt="Фото" class="income-photo-preview">` : 'Нет фото'}</td>
+                <td>${formatMoney(data.amount)}</td>
+                <td>${data.sender}</td>
+                <td>${data.receiver}</td>
+                <td>
+                    ${showActions ? `
+                        <button class="edit-btn edit-income">Изменить</button>
+                        <button class="delete-btn delete-income">Удалить</button>
+                    ` : '—'}
+                </td>
+            `;
+            incomeTableBody.appendChild(newRow);
+        });
         
-        // Рендерим карточки (для клиентов всегда, для админа на мобилке)
-        if (showCards) {
-            incomeCardsMobile.innerHTML = savedData.map((data, index) => {
-                const photoUrl = data.photo || '';
-                return `
-                    <div class="income-card">
-                        ${photoUrl ? `<img src="${photoUrl}" alt="Фото" class="income-card-image" data-photo-src="${photoUrl}" data-photo-date="${data.date}" data-photo-sender="${data.sender}" data-photo-amount="${data.amount}">` : ''}
-                        <div class="income-card-content">
-                            <div class="income-card-date">${data.date}</div>
-                            <div class="income-card-amount">${formatMoney(data.amount)}</div>
-                            <div class="income-card-info">
-                                <div class="income-card-info-item">
-                                    <span class="income-card-info-label">Кем передан:</span>
-                                    <span>${data.sender || '—'}</span>
-                                </div>
-                                <div class="income-card-info-item">
-                                    <span class="income-card-info-label">Кто получил:</span>
-                                    <span>${data.receiver || '—'}</span>
-                                </div>
+        // Рендерим карточки (всегда, для всех данных)
+        incomeCardsMobile.innerHTML = savedData.map((data, index) => {
+            const photoUrl = data.photo || '';
+            return `
+                <div class="income-card">
+                    ${photoUrl ? `<img src="${photoUrl}" alt="Фото" class="income-card-image" data-photo-src="${photoUrl}" data-photo-date="${data.date}" data-photo-sender="${data.sender}" data-photo-amount="${data.amount}">` : ''}
+                    <div class="income-card-content">
+                        <div class="income-card-date">${data.date}</div>
+                        <div class="income-card-amount">${formatMoney(data.amount)}</div>
+                        <div class="income-card-info">
+                            <div class="income-card-info-item">
+                                <span class="income-card-info-label">Кем передан:</span>
+                                <span>${data.sender || '—'}</span>
+                            </div>
+                            <div class="income-card-info-item">
+                                <span class="income-card-info-label">Кто получил:</span>
+                                <span>${data.receiver || '—'}</span>
                             </div>
                         </div>
                     </div>
-                `;
-            }).join('');
-            
-            // Добавляем обработчики клика на фото в карточках
-            incomeCardsMobile.querySelectorAll('.income-card-image').forEach(img => {
-                img.style.cursor = 'pointer';
-                img.addEventListener('click', () => {
-                    const photoModal = document.getElementById('photoPreviewModal');
-                    const photoImg = document.getElementById('photoPreviewImg');
-                    const photoCaption = document.getElementById('photoPreviewCaption');
-                    const closeBtn = document.getElementById('closePhotoPreview');
-                    
-                    if (photoImg) photoImg.src = img.dataset.photoSrc || '';
-                    if (photoCaption) {
-                        const date = img.dataset.photoDate || '';
-                        const sender = img.dataset.photoSender || '';
-                        const amount = img.dataset.photoAmount || '';
-                        photoCaption.textContent = `${date} • ${sender} • ${formatMoney(amount)}`;
-                    }
-                    if (photoModal) photoModal.classList.add('active');
-                    
-                    // Close handlers
-                    if (closeBtn) closeBtn.onclick = () => photoModal.classList.remove('active');
-                    if (photoModal) photoModal.onclick = (e) => { 
-                        if (e.target.id === 'photoPreviewModal') photoModal.classList.remove('active'); 
-                    };
-                });
+                </div>
+            `;
+        }).join('');
+        
+        // Добавляем обработчики клика на фото в карточках
+        incomeCardsMobile.querySelectorAll('.income-card-image').forEach(img => {
+            img.style.cursor = 'pointer';
+            img.addEventListener('click', () => {
+                const photoModal = document.getElementById('photoPreviewModal');
+                const photoImg = document.getElementById('photoPreviewImg');
+                const photoCaption = document.getElementById('photoPreviewCaption');
+                const closeBtn = document.getElementById('closePhotoPreview');
+                
+                if (photoImg) photoImg.src = img.dataset.photoSrc || '';
+                if (photoCaption) {
+                    const date = img.dataset.photoDate || '';
+                    const sender = img.dataset.photoSender || '';
+                    const amount = img.dataset.photoAmount || '';
+                    photoCaption.textContent = `${date} • ${sender} • ${formatMoney(amount)}`;
+                }
+                if (photoModal) photoModal.classList.add('active');
+                
+                // Close handlers
+                if (closeBtn) closeBtn.onclick = () => photoModal.classList.remove('active');
+                if (photoModal) photoModal.onclick = (e) => { 
+                    if (e.target.id === 'photoPreviewModal') photoModal.classList.remove('active'); 
+                };
             });
-        }
+        });
     };
 
     window.loadIncomeData();
