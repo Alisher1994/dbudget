@@ -165,10 +165,10 @@ app.get('/api/objects', isAuthenticated, async (req, res) => {
 
 app.post('/api/objects', isAuthenticated, isAdmin, async (req, res) => {
   try {
-    const { name, address, budget, client_id } = req.body;
+    const { name, address, budget, client_id, photo } = req.body;
     const result = await pool.query(
-      'INSERT INTO objects (name, address, budget, client_id) VALUES ($1, $2, $3, $4) RETURNING *',
-      [name, address, budget || 0, client_id || null]
+      'INSERT INTO objects (name, address, budget, client_id, photo) VALUES ($1, $2, $3, $4, $5) RETURNING *',
+      [name, address, budget || 0, client_id || null, photo || null]
     );
     res.json(result.rows[0]);
   } catch (err) {
@@ -180,10 +180,10 @@ app.post('/api/objects', isAuthenticated, isAdmin, async (req, res) => {
 app.put('/api/objects/:id', isAuthenticated, isAdmin, async (req, res) => {
   try {
     const { id } = req.params;
-    const { name, address, budget, spent, client_id } = req.body;
+    const { name, address, budget, spent, client_id, photo } = req.body;
     const result = await pool.query(
-      'UPDATE objects SET name = $1, address = $2, budget = $3, spent = $4, client_id = $5 WHERE id = $6 RETURNING *',
-      [name, address, budget, spent, client_id || null, id]
+      'UPDATE objects SET name = $1, address = $2, budget = $3, spent = $4, client_id = $5, photo = $6 WHERE id = $7 RETURNING *',
+      [name, address, budget, spent, client_id || null, photo || null, id]
     );
     res.json(result.rows[0]);
   } catch (err) {
@@ -206,7 +206,7 @@ app.delete('/api/objects/:id', isAuthenticated, isAdmin, async (req, res) => {
 // API - Пользователи
 app.get('/api/users', isAuthenticated, isAdmin, async (req, res) => {
   try {
-    const result = await pool.query('SELECT id, username, role, created_at FROM users ORDER BY created_at DESC');
+    const result = await pool.query('SELECT id, username, role, phone, created_at FROM users ORDER BY created_at DESC');
     res.json(result.rows);
   } catch (err) {
     console.error(err);
@@ -216,11 +216,11 @@ app.get('/api/users', isAuthenticated, isAdmin, async (req, res) => {
 
 app.post('/api/users', isAuthenticated, isAdmin, async (req, res) => {
   try {
-    const { username, password, role } = req.body;
+    const { username, password, role, phone } = req.body;
     const hashedPassword = await bcrypt.hash(password, 10);
     const result = await pool.query(
-      'INSERT INTO users (username, password, role) VALUES ($1, $2, $3) RETURNING id, username, role, created_at',
-      [username, hashedPassword, role || 'client']
+      'INSERT INTO users (username, password, role, phone) VALUES ($1, $2, $3, $4) RETURNING id, username, role, phone, created_at',
+      [username, hashedPassword, role || 'client', phone || null]
     );
     res.json(result.rows[0]);
   } catch (err) {

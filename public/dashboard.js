@@ -318,12 +318,7 @@ async function deleteUser(id) {
 
 // Вспомогательные функции
 function formatMoney(amount) {
-    return new Intl.NumberFormat('ru-RU', {
-        style: 'currency',
-        currency: 'RUB',
-        minimumFractionDigits: 0,
-        maximumFractionDigits: 0
-    }).format(amount || 0);
+    return new Intl.NumberFormat('uz-UZ').format(amount || 0) + ' сум';
 }
 
 function formatDate(dateString) {

@@ -24,6 +24,7 @@ body {
     background-color: var(--bg-secondary);
     color: var(--text-primary);
     line-height: 1.6;
+    font-size: 15px;
 }
 
 /* Страница входа */
@@ -90,7 +91,7 @@ body {
 
 /* Кнопки */
 .btn {
-    padding: 12px 24px;
+    padding: 10px 20px;
     border: none;
     border-radius: 8px;
     font-size: 15px;
@@ -98,12 +99,12 @@ body {
     cursor: pointer;
     transition: all 0.2s;
     font-family: inherit;
+    white-space: nowrap;
 }
 
 .btn-primary {
     background: var(--accent-color);
     color: white;
-    width: 100%;
 }
 
 .btn-primary:hover {
