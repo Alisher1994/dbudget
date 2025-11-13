@@ -90,6 +90,54 @@ function setupEventListeners() {
         `;
         incomeTableBody.appendChild(newRow);
     });
+
+    const saveIncomeData = (row) => {
+        const date = row.querySelector('.income-date').value;
+        const photo = row.querySelector('.income-photo').files[0]?.name || '';
+        const amount = row.querySelector('.income-amount').value;
+        const sender = row.querySelector('.income-sender').value;
+        const receiver = row.querySelector('.income-receiver').value;
+
+        const incomeData = {
+            date,
+            photo,
+            amount,
+            sender,
+            receiver
+        };
+
+        const savedData = JSON.parse(localStorage.getItem('incomeData')) || [];
+        savedData.push(incomeData);
+        localStorage.setItem('incomeData', JSON.stringify(savedData));
+
+        alert('Данные сохранены!');
+    };
+
+    incomeTableBody.addEventListener('click', (event) => {
+        if (event.target.classList.contains('save-income')) {
+            const row = event.target.closest('tr');
+            saveIncomeData(row);
+        }
+    });
+
+    const loadIncomeData = () => {
+        const savedData = JSON.parse(localStorage.getItem('incomeData')) || [];
+        savedData.forEach((data, index) => {
+            const newRow = document.createElement('tr');
+            newRow.innerHTML = `
+                <td>${index + 1}</td>
+                <td>${data.date}</td>
+                <td>${data.photo}</td>
+                <td>${data.amount}</td>
+                <td>${data.sender}</td>
+                <td>${data.receiver}</td>
+                <td><button class="btn btn-primary save-income">Сохранить</button></td>
+            `;
+            incomeTableBody.appendChild(newRow);
+        });
+    };
+
+    loadIncomeData();
 }
 
 function setupModal(modalId, openBtnId, closeBtnId, formId, submitHandler) {
