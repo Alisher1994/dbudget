@@ -72,6 +72,24 @@ function setupEventListeners() {
     setupModal('objectModal', 'addObjectBtn', 'cancelObjectBtn', 'objectForm', handleObjectSubmit);
     setupModal('userModal', 'addUserBtn', 'cancelUserBtn', 'userForm', handleUserSubmit);
     setupModal('editUserModal', null, 'cancelEditUserBtn', 'editUserForm', handleEditUserSubmit);
+
+    // Таблица Приход
+    const addIncomeBtn = document.getElementById('addIncomeBtn');
+    const incomeTableBody = document.getElementById('incomeTableBody');
+
+    addIncomeBtn.addEventListener('click', () => {
+        const newRow = document.createElement('tr');
+        newRow.innerHTML = `
+            <td></td>
+            <td><input type="date" class="income-date"></td>
+            <td><input type="file" class="income-photo" accept="image/*"></td>
+            <td><input type="number" class="income-amount" placeholder="Сумма"></td>
+            <td><input type="text" class="income-sender" placeholder="Кем передан"></td>
+            <td><input type="text" class="income-receiver" placeholder="Кто получил"></td>
+            <td><button class="btn btn-primary save-income">Сохранить</button></td>
+        `;
+        incomeTableBody.appendChild(newRow);
+    });
 }
 
 function setupModal(modalId, openBtnId, closeBtnId, formId, submitHandler) {

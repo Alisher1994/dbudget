@@ -978,3 +978,33 @@ body {
         flex: 1 1 100%;
     }
 }
+
+.income-header {
+    margin-bottom: 16px;
+    display: flex;
+    justify-content: flex-end;
+}
+.income-table {
+    width: 100%;
+    border-collapse: collapse;
+    background: var(--bg-primary);
+    border-radius: 12px;
+    box-shadow: var(--shadow);
+    overflow: hidden;
+}
+.income-table th, .income-table td {
+    padding: 12px;
+    text-align: left;
+    border-bottom: 1px solid var(--border-color);
+}
+.income-table th {
+    background: var(--bg-secondary);
+    font-weight: 600;
+}
+.income-table td {
+    font-size: 14px;
+    color: var(--text-primary);
+}
+.income-table tr:last-child td {
+    border-bottom: none;
+}
