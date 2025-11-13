@@ -244,6 +244,29 @@ function setupEventListeners() {
             incomeModal.classList.add('active');
             return;
         }
+
+        // Клик по миниатюре фото — открыть превью
+        if (event.target.tagName === 'IMG' && event.target.classList.contains('income-photo-preview')) {
+            const src = event.target.getAttribute('src') || '';
+            const tr = event.target.closest('tr');
+            const date = tr?.children[1]?.textContent || '';
+            const amount = tr?.children[3]?.textContent || '';
+            const sender = tr?.children[4]?.textContent || '';
+
+            const photoModal = document.getElementById('photoPreviewModal');
+            const photoImg = document.getElementById('photoPreviewImg');
+            const photoCaption = document.getElementById('photoPreviewCaption');
+            const closeBtn = document.getElementById('closePhotoPreview');
+
+            if (photoImg) photoImg.src = src;
+            if (photoCaption) photoCaption.textContent = `${date} • ${sender} • ${amount}`;
+            if (photoModal) photoModal.classList.add('active');
+
+            // Close handlers
+            if (closeBtn) closeBtn.onclick = () => photoModal.classList.remove('active');
+            if (photoModal) photoModal.onclick = (e) => { if (e.target.id === 'photoPreviewModal') photoModal.classList.remove('active'); };
+            return;
+        }
     });
 
     const loadIncomeData = () => {
