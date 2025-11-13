@@ -201,6 +201,39 @@ function setupEventListeners() {
         }
     });
 
+    // Обработчик загрузки фото из таблицы (в каждой строке есть input[type=file].income-photo-input)
+    incomeTableBody.addEventListener('change', async (event) => {
+        if (!event.target.classList.contains('income-photo-input')) return;
+        const input = event.target;
+        const row = input.closest('tr');
+        const rowIndex = row.rowIndex - 1; // учитывать заголовок
+        const file = input.files[0];
+        if (!file) return;
+        try {
+            const dataUrl = await readFileAsDataURL(file);
+            const savedData = JSON.parse(localStorage.getItem('incomeData')) || [];
+            if (!savedData[rowIndex]) return;
+            savedData[rowIndex].photo = dataUrl;
+            localStorage.setItem('incomeData', JSON.stringify(savedData));
+            // Обновить превью в строке
+            const img = row.querySelector('.income-photo-preview');
+            if (img) {
+                img.src = dataUrl;
+                img.style.display = 'inline-block';
+            }
+            // Обновим превью в модалке, если он открыт для этой строки
+            const modalPreview = document.querySelector('#incomeModal .photo-preview');
+            if (modalPreview && editingIncomeIndex === rowIndex) {
+                modalPreview.src = dataUrl;
+                modalPreview.style.display = 'inline-block';
+            }
+            if (window.renderAnalysisCharts) window.renderAnalysisCharts(currentUser?.role || 'admin');
+        } catch (e) {
+            console.error('Ошибка чтения фото:', e);
+            alert('Не удалось загрузить фото');
+        }
+    });
+
     const loadIncomeData = () => {
         incomeTableBody.innerHTML = '';
         const savedData = JSON.parse(localStorage.getItem('incomeData')) || [];
@@ -209,7 +242,12 @@ function setupEventListeners() {
             newRow.innerHTML = `
                 <td>${index + 1}</td>
                 <td>${data.date}</td>
-                <td>${data.photo ? `<img src="${data.photo}" alt="Фото" class="income-photo-preview">` : 'Нет фото'}</td>
+                <td>
+                    <div style="display:flex;align-items:center;gap:8px;">
+                        <input type="file" class="income-photo-input" accept="image/*" style="display:block">
+                        ${data.photo ? `<img src="${data.photo}" alt="Фото" class="income-photo-preview">` : '<img src="" alt="Фото" class="income-photo-preview" style="display:none">'}
+                    </div>
+                </td>
                 <td>${data.amount}</td>
                 <td>${data.sender}</td>
                 <td>${data.receiver}</td>
