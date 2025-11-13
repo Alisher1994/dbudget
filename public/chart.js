@@ -14,7 +14,7 @@ function formatSum(val) {
 
 // Финансовый анализ
 function renderFinanceChart(ctx, role) {
-    let labels, data, colors, sums;
+    let labels, data, colors;
     if (role === 'admin') {
         labels = ['Бюджет', 'Приход', 'Потрачено', 'Остаток', 'Недостача', 'Экономия'];
         data = [1000000, 800000, 600000, 200000, 0, 200000];
@@ -24,82 +24,71 @@ function renderFinanceChart(ctx, role) {
         data = [1000000, 800000, 600000, 200000];
         colors = ['#0071e3', '#34c759', '#ff3b30', '#ff9500'];
     }
-    sums = data.map(formatSum);
     // Суммы сверху
     const sumsRow = document.getElementById('financeSumsRow');
     if (sumsRow) {
-        sumsRow.innerHTML = labels.map((l, i) => `<span class="analysis-sum-item"><b>${l}:</b> ${sums[i]}</span>`).join('');
+        sumsRow.innerHTML = labels.map((l, i) => `<span class=\"analysis-sum-item\"><b>${l}:</b> ${formatSum(data[i])}</span>`).join('');
     }
     // Легенда
     const financeLegendDiv = document.getElementById('financeChartLegend');
     if (financeLegendDiv) {
-        financeLegendDiv.innerHTML = labels.map((l, i) => `<span class="chart-legend-item"><span class="chart-legend-color" style="background:${colors[i]}"></span>${l}</span>`).join('');
+        financeLegendDiv.innerHTML = labels.map((l, i) => `<span class=\"chart-legend-item\"><span class=\"chart-legend-color\" style=\"background:${colors[i]}\"></span>${l}</span>`).join('');
     }
-    // Горизонтальный bar chart с подписями внутри
+    // Горизонтальный bar chart: каждая категория — отдельная строка
     new Chart(ctx, {
         type: 'bar',
         data: {
-            labels: [''],
-            datasets: labels.map((l, i) => ({
-                label: l,
-                data: [data[i]],
-                backgroundColor: colors[i],
-                borderRadius: 20,
-                barPercentage: 1.0,
-                categoryPercentage: 1.0,
-            }))
+            labels: labels,
+            datasets: [{
+                data: data,
+                backgroundColor: colors,
+                borderRadius: 18,
+                borderSkipped: false,
+                barPercentage: 0.7,
+                categoryPercentage: 0.7,
+                maxBarThickness: 38,
+            }]
         },
         options: {
-            indexAxis: 'x',
+            indexAxis: 'y',
             plugins: {
                 legend: { display: false },
-                title: {
-                    display: false
-                },
-                datalabels: {
-                    display: false
-                }
+                title: { display: false },
+                datalabels: { display: false }
             },
             responsive: true,
-            aspectRatio: 4,
+            aspectRatio: 2.2,
             animation: false,
             scales: {
                 x: {
-                    display: false,
-                    stacked: true,
-                    min: 0,
-                    max: data.reduce((a, b) => a + b, 0),
+                    beginAtZero: true,
+                    grid: { color: '#eee' },
+                    ticks: { font: { size: 14 } }
                 },
                 y: {
-                    display: false,
-                    stacked: true,
+                    grid: { display: false },
+                    ticks: { font: { size: 15, weight: 'bold' } }
                 }
             }
         },
         plugins: [{
-            id: 'segmentLabels',
+            id: 'barLabels',
             afterDatasetsDraw: chart => {
                 const { ctx, chartArea, data } = chart;
-                const metaArr = chart.getSortedVisibleDatasetMetas();
-                let x = chartArea.left;
-                metaArr.forEach((meta, i) => {
-                    const bar = meta.data[0];
-                    if (!bar) return;
-                    const width = bar.width;
-                    const centerX = x + width / 2;
-                    const centerY = bar.y;
+                const meta = chart.getDatasetMeta(0);
+                meta.data.forEach((bar, i) => {
+                    const value = formatSum(data.datasets[0].data[i]);
+                    const x = bar.x - 16;
+                    const y = bar.y;
                     ctx.save();
-                    ctx.font = 'bold 14px Segoe UI';
-                    ctx.textAlign = 'center';
+                    ctx.font = 'bold 15px Segoe UI';
+                    ctx.textAlign = 'right';
                     ctx.textBaseline = 'middle';
                     ctx.fillStyle = '#fff';
                     ctx.shadowColor = '#222';
                     ctx.shadowBlur = 2;
-                    ctx.fillText(labels[i], centerX, centerY - 12);
-                    ctx.font = '13px Segoe UI';
-                    ctx.fillText(sums[i], centerX, centerY + 10);
+                    ctx.fillText(value, x, y);
                     ctx.restore();
-                    x += width;
                 });
             }
         }]
