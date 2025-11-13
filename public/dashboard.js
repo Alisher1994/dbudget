@@ -76,19 +76,41 @@ function setupEventListeners() {
     // Таблица Приход
     const addIncomeBtn = document.getElementById('addIncomeBtn');
     const incomeTableBody = document.getElementById('incomeTableBody');
+    const incomeModal = document.getElementById('incomeModal');
+    const closeIncomeModal = document.getElementById('closeIncomeModal');
+    const saveIncome = document.getElementById('saveIncome');
+    const cancelIncome = document.getElementById('cancelIncome');
+    const incomeForm = document.getElementById('incomeForm');
 
     addIncomeBtn.addEventListener('click', () => {
-        const newRow = document.createElement('tr');
-        newRow.innerHTML = `
-            <td></td>
-            <td><input type="date" class="income-date"></td>
-            <td><input type="file" class="income-photo" accept="image/*"></td>
-            <td><input type="number" class="income-amount" placeholder="Сумма"></td>
-            <td><input type="text" class="income-sender" placeholder="Кем передан"></td>
-            <td><input type="text" class="income-receiver" placeholder="Кто получил"></td>
-            <td><button class="btn btn-primary save-income">Сохранить</button></td>
-        `;
-        incomeTableBody.appendChild(newRow);
+        incomeModal.classList.add('active');
+    });
+
+    closeIncomeModal.addEventListener('click', () => {
+        incomeModal.classList.remove('active');
+    });
+
+    cancelIncome.addEventListener('click', () => {
+        incomeModal.classList.remove('active');
+    });
+
+    saveIncome.addEventListener('click', () => {
+        const formData = new FormData(incomeForm);
+        const incomeData = {
+            date: formData.get('incomeDate'),
+            photo: formData.get('incomePhoto'),
+            amount: formData.get('incomeAmount'),
+            sender: formData.get('incomeSender'),
+            receiver: formData.get('incomeReceiver')
+        };
+
+        const savedData = JSON.parse(localStorage.getItem('incomeData')) || [];
+        savedData.push(incomeData);
+        localStorage.setItem('incomeData', JSON.stringify(savedData));
+
+        alert('Данные сохранены!');
+        incomeModal.classList.remove('active');
+        loadIncomeData();
     });
 
     const saveIncomeData = (row) => {
@@ -562,100 +584,3 @@ function switchSubTab(subtabName) {
     });
     document.getElementById(`${subtabName}-subtab`)?.classList.add('active');
 }
-
-// --- Chart.js destroy fix ---
-let financeChartInstance = null;
-function renderFinanceChart(ctx, role) {
-    if (financeChartInstance) {
-        financeChartInstance.destroy();
-    }
-    // ...existing code chart creation...
-    financeChartInstance = new Chart(ctx, { /* ...chart config... */ });
-}
-// --- End Chart.js destroy fix ---
-
-// МОДАЛЬНОЕ ОКНО ДЛЯ ПРИХОДА
-const incomeModal = document.getElementById('incomeModal');
-const closeIncomeModal = document.getElementById('closeIncomeModal');
-const addIncomeBtn = document.getElementById('addIncomeBtn');
-const incomeForm = document.getElementById('incomeForm');
-const incomePhoto = document.getElementById('incomePhoto');
-const incomePhotoPreview = document.getElementById('incomePhotoPreview');
-const incomeTableBody = document.getElementById('incomeTableBody');
-
-function openIncomeModal(editIndex = null) {
-    incomeModal.style.display = 'flex';
-    incomeModal.dataset.editIndex = editIndex;
-    if (editIndex !== null) {
-        const savedData = JSON.parse(localStorage.getItem('incomeData')) || [];
-        const data = savedData[editIndex];
-        document.getElementById('incomeDate').value = data.date;
-        document.getElementById('incomeAmount').value = data.amount;
-        document.getElementById('incomeSender').value = data.sender;
-        document.getElementById('incomeReceiver').value = data.receiver;
-        if (data.photo) {
-            incomePhotoPreview.src = data.photo;
-            incomePhotoPreview.style.display = 'block';
-        } else {
-            incomePhotoPreview.style.display = 'none';
-        }
-        document.getElementById('incomeModalTitle').textContent = 'Изменить приход';
-    } else {
-        incomeForm.reset();
-        incomePhotoPreview.style.display = 'none';
-        document.getElementById('incomeModalTitle').textContent = 'Добавить приход';
-    }
-}
-
-addIncomeBtn.addEventListener('click', () => openIncomeModal());
-closeIncomeModal.addEventListener('click', () => {
-    incomeModal.style.display = 'none';
-});
-
-incomeForm.addEventListener('submit', (e) => {
-    e.preventDefault();
-    const date = document.getElementById('incomeDate').value;
-    const amount = document.getElementById('incomeAmount').value;
-    const sender = document.getElementById('incomeSender').value;
-    const receiver = document.getElementById('incomeReceiver').value;
-    let photo = '';
-    if (incomePhotoPreview.src && incomePhotoPreview.style.display === 'block') {
-        photo = incomePhotoPreview.src;
-    }
-    if (!date || !amount || !sender || !receiver) {
-        alert('Заполните все поля!');
-        return;
-    }
-    const savedData = JSON.parse(localStorage.getItem('incomeData')) || [];
-    const editIndex = incomeModal.dataset.editIndex;
-    if (editIndex && editIndex !== 'null') {
-        savedData[editIndex] = { date, amount, sender, receiver, photo };
-    } else {
-        savedData.push({ date, amount, sender, receiver, photo });
-    }
-    localStorage.setItem('incomeData', JSON.stringify(savedData));
-    incomeModal.style.display = 'none';
-    renderIncomeTable();
-});
-
-function renderIncomeTable() {
-    incomeTableBody.innerHTML = '';
-    const savedData = JSON.parse(localStorage.getItem('incomeData')) || [];
-    savedData.forEach((data, index) => {
-        if (!data.date || !data.amount || !data.sender || !data.receiver) return;
-        const newRow = document.createElement('tr');
-        newRow.innerHTML = `
-            <td>${index + 1}</td>
-            <td>${data.date}</td>
-            <td>${data.photo ? `<img src='${data.photo}' style='max-width:60px;border-radius:6px;'>` : ''}</td>
-            <td>${data.amount}</td>
-            <td>${data.sender}</td>
-            <td>${data.receiver}</td>
-            <td><button class="btn btn-secondary edit-income">Изменить</button></td>
-        `;
-        newRow.querySelector('.edit-income').addEventListener('click', () => openIncomeModal(index));
-        incomeTableBody.appendChild(newRow);
-    });
-}
-renderIncomeTable();
-// --- End Income modal logic fix ---
