@@ -286,7 +286,7 @@ function setupEventListeners() {
         try {
             const stored = localStorage.getItem('incomeData');
             savedData = stored ? JSON.parse(stored) : [];
-            console.log('Загружено данных прихода:', savedData.length);
+            console.log('Загружено данных прихода из localStorage:', savedData.length, savedData);
         } catch (e) {
             console.error('Ошибка чтения данных прихода:', e);
             savedData = [];
@@ -353,15 +353,23 @@ function setupEventListeners() {
         const isMobile = window.innerWidth <= 768;
         const showCards = isClient || isMobile; // Клиент всегда видит карточки, админ на мобилке тоже
         
+        console.log('Отображение прихода:', { isMobile, isClient, showCards, savedDataLength: savedData.length });
+        
         // Показываем/скрываем таблицу и карточки
         if (incomeTableDesktop) {
-            incomeTableDesktop.style.display = showCards ? 'none' : 'block';
+            if (showCards || isMobile) {
+                incomeTableDesktop.style.display = 'none';
+            } else {
+                incomeTableDesktop.style.display = 'block';
+            }
         }
         if (incomeCardsMobile) {
-            if (showCards) {
+            if (showCards || isMobile) {
                 incomeCardsMobile.classList.add('show');
+                incomeCardsMobile.style.display = 'flex';
             } else {
                 incomeCardsMobile.classList.remove('show');
+                incomeCardsMobile.style.display = 'none';
             }
         }
         
@@ -443,7 +451,7 @@ function setupEventListeners() {
         });
     };
 
-    window.loadIncomeData();
+    // НЕ вызываем loadIncomeData здесь - она будет вызвана при открытии вкладки прихода
 }
 
 function setupModal(modalId, openBtnId, closeBtnId, formId, submitHandler) {
