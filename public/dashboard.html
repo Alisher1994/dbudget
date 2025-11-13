@@ -9,12 +9,40 @@
 <body>
     <div class="app-container">
         <header class="header">
-            <h1>Design Key</h1>
-            <div class="user-info">
+            <h1 class="logo-desktop">Design Key</h1>
+            <div class="user-info user-info-desktop">
                 <span id="userName"></span>
                 <button id="logoutBtn" class="btn btn-secondary">Выйти</button>
             </div>
+            <button id="accountMenuBtn" class="account-btn-mobile">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                    <circle cx="12" cy="7" r="4"></circle>
+                </svg>
+            </button>
         </header>
+
+        <!-- Мобильное меню аккаунта -->
+        <div id="accountMenu" class="account-menu">
+            <div class="account-menu-content">
+                <div class="account-menu-header">
+                    <h3>Аккаунт</h3>
+                    <button id="closeAccountMenu" class="close-menu-btn">&times;</button>
+                </div>
+                <div class="account-menu-body">
+                    <div class="account-info">
+                        <div class="account-icon">
+                            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                                <circle cx="12" cy="7" r="4"></circle>
+                            </svg>
+                        </div>
+                        <div class="account-name" id="accountUserName"></div>
+                    </div>
+                    <button id="logoutBtnMobile" class="btn btn-primary" style="width: 100%;">Выйти</button>
+                </div>
+            </div>
+        </div>
 
         <nav class="tabs">
             <button class="tab-button active" data-tab="objects">Объекты</button>
@@ -29,7 +57,8 @@
                     <button id="addObjectBtn" class="btn btn-primary" style="display: none;">+ Добавить объект</button>
                 </div>
 
-                <div class="table-container">
+                <!-- Таблица для десктопа -->
+                <div class="table-container objects-table-desktop">
                     <table class="data-table">
                         <thead>
                             <tr>
@@ -48,6 +77,11 @@
                             </tr>
                         </tbody>
                     </table>
+                </div>
+
+                <!-- Карточки для мобильных -->
+                <div class="objects-cards-mobile" id="objectsCardsMobile">
+                    <div class="empty-state">Загрузка...</div>
                 </div>
             </div>
 

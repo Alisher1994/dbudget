@@ -24,6 +24,7 @@ async function loadUser() {
         const response = await fetch('/api/user');
         currentUser = await response.json();
         document.getElementById('userName').textContent = currentUser.username;
+        document.getElementById('accountUserName').textContent = currentUser.username;
     } catch (err) {
         console.error('Ошибка загрузки пользователя:', err);
         window.location.href = '/';
@@ -32,10 +33,31 @@ async function loadUser() {
 
 // Настройка обработчиков событий
 function setupEventListeners() {
-    // Выход
+    // Выход (десктоп)
     document.getElementById('logoutBtn').addEventListener('click', async () => {
         await fetch('/api/logout', { method: 'POST' });
         window.location.href = '/';
+    });
+
+    // Выход (мобильный)
+    document.getElementById('logoutBtnMobile').addEventListener('click', async () => {
+        await fetch('/api/logout', { method: 'POST' });
+        window.location.href = '/';
+    });
+
+    // Мобильное меню аккаунта
+    document.getElementById('accountMenuBtn').addEventListener('click', () => {
+        document.getElementById('accountMenu').classList.add('active');
+    });
+
+    document.getElementById('closeAccountMenu').addEventListener('click', () => {
+        document.getElementById('accountMenu').classList.remove('active');
+    });
+
+    document.getElementById('accountMenu').addEventListener('click', (e) => {
+        if (e.target.id === 'accountMenu') {
+            document.getElementById('accountMenu').classList.remove('active');
+        }
     });
 
     // Переключение вкладок
@@ -115,12 +137,15 @@ async function loadObjects() {
 
 function renderObjects() {
     const tbody = document.getElementById('objectsTableBody');
+    const cardsContainer = document.getElementById('objectsCardsMobile');
     
     if (currentObjects.length === 0) {
         tbody.innerHTML = '<tr><td colspan="7" class="empty-state">Нет объектов</td></tr>';
+        cardsContainer.innerHTML = '<div class="empty-state">Нет объектов</div>';
         return;
     }
 
+    // Рендерим таблицу для десктопа
     tbody.innerHTML = currentObjects.map(obj => {
         const remaining = (obj.budget || 0) - (obj.spent || 0);
         const isAdmin = currentUser.role === 'admin';
@@ -146,6 +171,23 @@ function renderObjects() {
                     </div>
                 </td>
             </tr>
+        `;
+    }).join('');
+
+    // Рендерим карточки для мобильных
+    cardsContainer.innerHTML = currentObjects.map(obj => {
+        const photoUrl = obj.photo || 'https://via.placeholder.com/300x200?text=No+Image';
+        
+        return `
+            <div class="object-card" onclick="openObjectDetail(${obj.id})">
+                <div class="object-card-image" style="background-image: url('${photoUrl}');"></div>
+                <div class="object-card-content">
+                    <h3 class="object-card-title">${obj.name}</h3>
+                    <div class="object-card-info">
+                        ${obj.address ? `<p class="object-card-address">${obj.address}</p>` : ''}
+                    </div>
+                </div>
+            </div>
         `;
     }).join('');
 }

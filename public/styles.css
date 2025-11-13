@@ -501,11 +501,190 @@ body {
     box-shadow: var(--shadow);
 }
 
+/* Мобильное меню аккаунта */
+.account-btn-mobile {
+    display: none;
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 8px;
+    color: var(--text-primary);
+    border-radius: 8px;
+    transition: background 0.2s;
+}
+
+.account-btn-mobile:hover {
+    background: var(--bg-hover);
+}
+
+.account-menu {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 2000;
+    opacity: 0;
+    transition: opacity 0.3s;
+}
+
+.account-menu.active {
+    display: flex;
+    align-items: flex-end;
+    opacity: 1;
+}
+
+.account-menu-content {
+    background: var(--bg-primary);
+    width: 100%;
+    border-radius: 20px 20px 0 0;
+    padding: 24px;
+    transform: translateY(100%);
+    transition: transform 0.3s;
+}
+
+.account-menu.active .account-menu-content {
+    transform: translateY(0);
+}
+
+.account-menu-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 24px;
+}
+
+.account-menu-header h3 {
+    font-size: 20px;
+    font-weight: 600;
+}
+
+.close-menu-btn {
+    background: none;
+    border: none;
+    font-size: 32px;
+    line-height: 1;
+    cursor: pointer;
+    color: var(--text-secondary);
+    padding: 0;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.account-menu-body {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.account-info {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+    padding: 20px;
+    background: var(--bg-secondary);
+    border-radius: 12px;
+}
+
+.account-icon {
+    width: 64px;
+    height: 64px;
+    background: var(--accent-color);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+}
+
+.account-name {
+    font-size: 18px;
+    font-weight: 600;
+}
+
+/* Мобильные карточки объектов */
+.objects-cards-mobile {
+    display: none;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 16px;
+}
+
+.object-card {
+    background: var(--bg-primary);
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: var(--shadow);
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.object-card:active {
+    transform: scale(0.98);
+    box-shadow: var(--shadow-lg);
+}
+
+.object-card-image {
+    width: 100%;
+    height: 180px;
+    background-size: cover;
+    background-position: center;
+    background-color: var(--bg-secondary);
+}
+
+.object-card-content {
+    padding: 16px;
+}
+
+.object-card-title {
+    font-size: 18px;
+    font-weight: 600;
+    margin-bottom: 8px;
+    color: var(--text-primary);
+}
+
+.object-card-info {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.object-card-address {
+    font-size: 14px;
+    color: var(--text-secondary);
+    margin: 0;
+}
+
 /* Адаптивность */
 @media (max-width: 768px) {
+    /* Скрываем десктопные элементы */
+    .logo-desktop,
+    .user-info-desktop {
+        display: none;
+    }
+
+    /* Показываем мобильные элементы */
+    .account-btn-mobile {
+        display: flex;
+    }
+
+    .objects-cards-mobile {
+        display: grid;
+    }
+
+    .objects-table-desktop {
+        display: none;
+    }
+
     .header {
         padding: 16px;
-        flex-direction: column;
+        flex-direction: row;
+        justify-content: space-between;
         gap: 12px;
     }
 
