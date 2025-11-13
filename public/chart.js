@@ -132,150 +132,77 @@ function renderResourceColumnChart(ctx, label, plan, fact, i) {
 }
 
 function renderResourceGaugeChart(ctx, label, plan, fact, i) {
+    // Рисуем две отдельные горизонтальные полосы: План и Факт
     const over = fact > plan;
     const factColor = over ? '#ff9500' : '#34c759';
-    const planColor = '#e0e0e0';
-    // Название сверху
+    const planColor = '#e6e6e6';
+    // Название сверху (внесено в DOM отдельно)
     new Chart(ctx, {
         type: 'bar',
         data: {
-            labels: [''],
-            datasets: [
-                {
-                    label: 'План',
-                    data: [plan],
-                    backgroundColor: planColor,
-                    borderRadius: 20,
-                    barPercentage: 1.0,
-                    categoryPercentage: 1.0,
-                },
-                {
-                    label: 'Факт',
-                    data: [Math.min(fact, plan)],
-                    backgroundColor: factColor,
-                    borderRadius: 20,
-                    barPercentage: 1.0,
-                    categoryPercentage: 1.0,
-                }
-            ]
-        },
-        options: {
-            indexAxis: 'x',
-            plugins: {
-                legend: { display: false },
-                title: {
-                    display: true,
-                    text: label,
-                    align: 'center',
-                    color: '#222',
-                    font: { size: 16, weight: 'bold' },
-                    padding: { top: 10, bottom: 0 }
-                }
-            },
-            responsive: true,
-            aspectRatio: 4,
-            animation: false,
-            scales: {
-                x: {
-                    display: false,
-                    stacked: true,
-                    min: 0,
-                    max: plan,
-                },
-                y: {
-                    display: false,
-                    stacked: true,
-                }
-            }
-        }
-    });
-    // Суммы под чартом
-    const sumBlock = document.getElementById('resourceSumsBlock' + i);
-    if (sumBlock) {
-        sumBlock.innerHTML = `<div class=\"resource-sum-plan\">План: <span>${formatSum(plan)}</span></div><div class=\"resource-sum-fact\">Факт: <span>${formatSum(fact)}</span></div>`;
-    }
-}
-
-function renderResourceChart(ctx, label, plan, fact) {
-    // Две отдельные горизонтальные линии: план (серый), факт (цветной)
-    new Chart(ctx, {
-        type: 'bar',
-        data: {
-            labels: [label, label],
-            datasets: [
-                {
-                    data: [plan, 0],
-                    backgroundColor: '#e0e0e0',
-                    borderRadius: { topLeft: 7, topRight: 7, bottomLeft: 0, bottomRight: 0 },
-                    barPercentage: 0.7,
-                    categoryPercentage: 0.7,
-                    maxBarThickness: 18,
-                },
-                {
-                    data: [0, fact],
-                    backgroundColor: '#34c759',
-                    borderRadius: { topLeft: 0, topRight: 0, bottomLeft: 7, bottomRight: 7 },
-                    barPercentage: 0.7,
-                    categoryPercentage: 0.7,
-                    maxBarThickness: 18,
-                }
-            ]
+            labels: ['План', 'Факт'],
+            datasets: [{
+                data: [plan, fact],
+                backgroundColor: [planColor, factColor],
+                borderRadius: 8,
+                borderSkipped: false,
+                barPercentage: 0.7,
+                categoryPercentage: 0.6,
+                maxBarThickness: 18,
+            }]
         },
         options: {
             indexAxis: 'y',
             plugins: {
                 legend: { display: false },
-                title: { display: false },
-                datalabels: { display: false }
+                title: { display: false }
             },
             responsive: true,
-            aspectRatio: 3.5,
             animation: false,
+            maintainAspectRatio: false,
             scales: {
                 x: {
                     beginAtZero: true,
-                    grid: { display: false },
-                    ticks: { display: false }
+                    grid: { display: false }
                 },
                 y: {
                     grid: { display: false },
-                    ticks: { display: false }
+                    ticks: { font: { size: 14, weight: '600' } }
                 }
+            },
+            layout: {
+                padding: { top: 8, bottom: 8 }
             }
         },
         plugins: [{
-            id: 'barLabels',
+            id: 'resourceBarLabels',
             afterDatasetsDraw: chart => {
-                const { ctx, data } = chart;
-                // План (верхняя линия)
-                const planMeta = chart.getDatasetMeta(0);
-                if (planMeta.data[0]) {
-                    const bar = planMeta.data[0];
-                    const value = formatSum(data.datasets[0].data[0]);
+                const { ctx } = chart;
+                const meta = chart.getDatasetMeta(0);
+                meta.data.forEach((bar, idx) => {
+                    const val = chart.data.datasets[0].data[idx];
+                    const txt = formatSum(val);
+                    // цвет текста: белый для зелёного/оранжевого факта, тёмно-серый для серого плана
+                    const bg = chart.data.datasets[0].backgroundColor[idx];
+                    const isGreen = String(bg).toLowerCase() === '#34c759' || String(bg).toLowerCase() === '#30d158' || String(bg).toLowerCase() === '#ff9500';
                     ctx.save();
                     ctx.font = '12px Segoe UI';
-                    ctx.textAlign = 'center';
                     ctx.textBaseline = 'middle';
-                    ctx.fillStyle = '#555';
-                    ctx.fillText(value, bar.x, bar.y);
+                    ctx.textAlign = 'right';
+                    const x = Math.min(bar.x - 8, chart.chartArea.right - 8);
+                    const y = bar.y;
+                    ctx.fillStyle = isGreen ? '#ffffff' : '#444';
+                    ctx.fillText(txt, x, y);
                     ctx.restore();
-                }
-                // Факт (нижняя линия)
-                const factMeta = chart.getDatasetMeta(1);
-                if (factMeta.data[1]) {
-                    const bar = factMeta.data[1];
-                    const value = formatSum(data.datasets[1].data[1]);
-                    ctx.save();
-                    ctx.font = '12px Segoe UI';
-                    ctx.textAlign = 'center';
-                    ctx.textBaseline = 'middle';
-                    ctx.fillStyle = '#fff';
-                    ctx.fillText(value, bar.x, bar.y);
-                    ctx.restore();
-                }
+                });
             }
         }]
     });
+    // Суммы под чартом (план/факт) — показываем под заголовком карточки
+    const sumBlock = document.getElementById('resourceSumsBlock' + i);
+    if (sumBlock) {
+        sumBlock.innerHTML = `<div class="resource-sum-plan">План: <span>${formatSum(plan)}</span></div><div class=\"resource-sum-fact\">Факт: <span>${formatSum(fact)}</span></div>`;
+    }
 }
 
 window.renderAnalysisCharts = function(role) {
