@@ -1012,3 +1012,23 @@ body {
     border-radius: 8px;
     box-shadow: var(--shadow);
 }
+
+button.edit-btn, button.delete-btn {
+    height: 40px;
+    font-size: 14px;
+    padding: 5px 10px;
+}
+
+button.edit-btn {
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 5px;
+}
+
+button.delete-btn {
+    background-color: #dc3545;
+    color: white;
+    border: none;
+    border-radius: 5px;
+}

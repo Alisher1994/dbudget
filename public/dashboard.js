@@ -95,13 +95,24 @@ function setupEventListeners() {
     });
 
     saveIncome.addEventListener('click', () => {
-        const formData = new FormData(incomeForm);
+        const date = document.getElementById('incomeDate').value;
+        const photoInput = document.getElementById('incomePhoto');
+        const photo = photoInput.files[0] ? URL.createObjectURL(photoInput.files[0]) : '';
+        const amount = document.getElementById('incomeAmount').value;
+        const sender = document.getElementById('incomeSender').value;
+        const receiver = document.getElementById('incomeReceiver').value;
+
+        if (!date || !amount || !sender || !receiver) {
+            alert('Заполните все обязательные поля!');
+            return;
+        }
+
         const incomeData = {
-            date: formData.get('incomeDate'),
-            photo: formData.get('incomePhoto'),
-            amount: formData.get('incomeAmount'),
-            sender: formData.get('incomeSender'),
-            receiver: formData.get('incomeReceiver')
+            date,
+            photo,
+            amount,
+            sender,
+            receiver
         };
 
         const savedData = JSON.parse(localStorage.getItem('incomeData')) || [];
