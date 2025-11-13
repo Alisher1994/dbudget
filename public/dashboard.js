@@ -138,6 +138,81 @@ function setupEventListeners() {
     };
 
     loadIncomeData();
+
+    const incomeModal = document.getElementById('incomeModal');
+    const closeIncomeModal = document.getElementById('closeIncomeModal');
+    const saveIncome = document.getElementById('saveIncome');
+    const cancelIncome = document.getElementById('cancelIncome');
+    const addIncomeBtn = document.getElementById('addIncomeBtn');
+
+    addIncomeBtn.addEventListener('click', () => {
+        incomeModal.classList.add('active');
+    });
+
+    closeIncomeModal.addEventListener('click', () => {
+        incomeModal.classList.remove('active');
+    });
+
+    cancelIncome.addEventListener('click', () => {
+        incomeModal.classList.remove('active');
+    });
+
+    saveIncome.addEventListener('click', () => {
+        const date = document.getElementById('incomeDate').value;
+        const photo = document.getElementById('incomePhoto').files[0]?.name || '';
+        const amount = document.getElementById('incomeAmount').value;
+        const sender = document.getElementById('incomeSender').value;
+        const receiver = document.getElementById('incomeReceiver').value;
+
+        const incomeData = {
+            date,
+            photo,
+            amount,
+            sender,
+            receiver
+        };
+
+        const savedData = JSON.parse(localStorage.getItem('incomeData')) || [];
+        savedData.push(incomeData);
+        localStorage.setItem('incomeData', JSON.stringify(savedData));
+
+        alert('Данные сохранены!');
+        incomeModal.classList.remove('active');
+        loadIncomeData();
+    });
+
+    const loadIncomeData = () => {
+        const savedData = JSON.parse(localStorage.getItem('incomeData')) || [];
+        incomeTableBody.innerHTML = '';
+        savedData.forEach((data, index) => {
+            const newRow = document.createElement('tr');
+            newRow.innerHTML = `
+                <td>${index + 1}</td>
+                <td>${data.date}</td>
+                <td>${data.photo}</td>
+                <td>${data.amount}</td>
+                <td>${data.sender}</td>
+                <td>${data.receiver}</td>
+                <td><button class="btn btn-secondary edit-income">Изменить</button></td>
+            `;
+            incomeTableBody.appendChild(newRow);
+        });
+    };
+
+    incomeTableBody.addEventListener('click', (event) => {
+        if (event.target.classList.contains('edit-income')) {
+            const row = event.target.closest('tr');
+            const cells = row.querySelectorAll('td');
+            document.getElementById('incomeDate').value = cells[1].textContent;
+            document.getElementById('incomePhoto').value = cells[2].textContent;
+            document.getElementById('incomeAmount').value = cells[3].textContent;
+            document.getElementById('incomeSender').value = cells[4].textContent;
+            document.getElementById('incomeReceiver').value = cells[5].textContent;
+            incomeModal.classList.add('active');
+        }
+    });
+
+    loadIncomeData();
 }
 
 function setupModal(modalId, openBtnId, closeBtnId, formId, submitHandler) {
