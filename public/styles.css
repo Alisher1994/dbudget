@@ -89,6 +89,23 @@ body {
     box-shadow: 0 0 0 3px rgba(0, 113, 227, 0.1);
 }
 
+.form-control {
+    width: 100%;
+    padding: 12px 16px;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    font-size: 15px;
+    background: var(--bg-primary);
+    transition: all 0.2s;
+    margin-bottom: 8px;
+}
+
+.form-control:focus {
+    outline: none;
+    border-color: var(--accent-color);
+    box-shadow: 0 0 0 3px rgba(0, 113, 227, 0.1);
+}
+
 /* Кнопки */
 .btn {
     padding: 10px 20px;
@@ -331,12 +348,12 @@ body {
     height: 100%;
     background: rgba(0, 0, 0, 0.5);
     backdrop-filter: blur(4px);
-    align-items: center;
-    justify-content: center;
 }
 
 .modal.active {
     display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .modal-content {
@@ -344,15 +361,22 @@ body {
     border-radius: 16px;
     width: 90%;
     max-width: 500px;
-    padding: 24px;
+    max-height: 90vh;
+    overflow-y: auto;
     box-shadow: var(--shadow-lg);
+}
+
+.modal-content img {
+    display: block;
+    margin: 0 auto;
 }
 
 .modal-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 16px;
+    padding: 24px 24px 16px;
+    border-bottom: 1px solid var(--border-color);
 }
 
 .modal-header h3 {
@@ -364,6 +388,7 @@ body {
     font-size: 28px;
     color: var(--text-secondary);
     cursor: pointer;
+    line-height: 1;
 }
 
 .close:hover {

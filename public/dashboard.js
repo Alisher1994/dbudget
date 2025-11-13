@@ -138,81 +138,6 @@ function setupEventListeners() {
     };
 
     loadIncomeData();
-
-    const incomeModal = document.getElementById('incomeModal');
-    const closeIncomeModal = document.getElementById('closeIncomeModal');
-    const saveIncome = document.getElementById('saveIncome');
-    const cancelIncome = document.getElementById('cancelIncome');
-    const addIncomeBtn = document.getElementById('addIncomeBtn');
-
-    addIncomeBtn.addEventListener('click', () => {
-        incomeModal.classList.add('active');
-    });
-
-    closeIncomeModal.addEventListener('click', () => {
-        incomeModal.classList.remove('active');
-    });
-
-    cancelIncome.addEventListener('click', () => {
-        incomeModal.classList.remove('active');
-    });
-
-    saveIncome.addEventListener('click', () => {
-        const date = document.getElementById('incomeDate').value;
-        const photo = document.getElementById('incomePhoto').files[0]?.name || '';
-        const amount = document.getElementById('incomeAmount').value;
-        const sender = document.getElementById('incomeSender').value;
-        const receiver = document.getElementById('incomeReceiver').value;
-
-        const incomeData = {
-            date,
-            photo,
-            amount,
-            sender,
-            receiver
-        };
-
-        const savedData = JSON.parse(localStorage.getItem('incomeData')) || [];
-        savedData.push(incomeData);
-        localStorage.setItem('incomeData', JSON.stringify(savedData));
-
-        alert('Данные сохранены!');
-        incomeModal.classList.remove('active');
-        loadIncomeData();
-    });
-
-    const loadIncomeData = () => {
-        const savedData = JSON.parse(localStorage.getItem('incomeData')) || [];
-        incomeTableBody.innerHTML = '';
-        savedData.forEach((data, index) => {
-            const newRow = document.createElement('tr');
-            newRow.innerHTML = `
-                <td>${index + 1}</td>
-                <td>${data.date}</td>
-                <td>${data.photo}</td>
-                <td>${data.amount}</td>
-                <td>${data.sender}</td>
-                <td>${data.receiver}</td>
-                <td><button class="btn btn-secondary edit-income">Изменить</button></td>
-            `;
-            incomeTableBody.appendChild(newRow);
-        });
-    };
-
-    incomeTableBody.addEventListener('click', (event) => {
-        if (event.target.classList.contains('edit-income')) {
-            const row = event.target.closest('tr');
-            const cells = row.querySelectorAll('td');
-            document.getElementById('incomeDate').value = cells[1].textContent;
-            document.getElementById('incomePhoto').value = cells[2].textContent;
-            document.getElementById('incomeAmount').value = cells[3].textContent;
-            document.getElementById('incomeSender').value = cells[4].textContent;
-            document.getElementById('incomeReceiver').value = cells[5].textContent;
-            incomeModal.classList.add('active');
-        }
-    });
-
-    loadIncomeData();
 }
 
 function setupModal(modalId, openBtnId, closeBtnId, formId, submitHandler) {
@@ -637,3 +562,95 @@ function switchSubTab(subtabName) {
     });
     document.getElementById(`${subtabName}-subtab`)?.classList.add('active');
 }
+
+// МОДАЛЬНОЕ ОКНО ДЛЯ ПРИХОДА
+const incomeModal = document.getElementById('incomeModal');
+const closeIncomeModal = document.getElementById('closeIncomeModal');
+const addIncomeBtn = document.getElementById('addIncomeBtn');
+const incomeForm = document.getElementById('incomeForm');
+const incomePhoto = document.getElementById('incomePhoto');
+const incomePhotoPreview = document.getElementById('incomePhotoPreview');
+const incomeTableBody = document.getElementById('incomeTableBody');
+
+function openIncomeModal(editIndex = null) {
+    incomeModal.style.display = 'flex';
+    incomeModal.dataset.editIndex = editIndex;
+    if (editIndex !== null) {
+        const savedData = JSON.parse(localStorage.getItem('incomeData')) || [];
+        const data = savedData[editIndex];
+        document.getElementById('incomeDate').value = data.date;
+        document.getElementById('incomeAmount').value = data.amount;
+        document.getElementById('incomeSender').value = data.sender;
+        document.getElementById('incomeReceiver').value = data.receiver;
+        if (data.photo) {
+            incomePhotoPreview.src = data.photo;
+            incomePhotoPreview.style.display = 'block';
+        } else {
+            incomePhotoPreview.style.display = 'none';
+        }
+        document.getElementById('incomeModalTitle').textContent = 'Изменить приход';
+    } else {
+        incomeForm.reset();
+        incomePhotoPreview.style.display = 'none';
+        document.getElementById('incomeModalTitle').textContent = 'Добавить приход';
+    }
+}
+
+addIncomeBtn.addEventListener('click', () => openIncomeModal());
+closeIncomeModal.addEventListener('click', () => {
+    incomeModal.style.display = 'none';
+});
+incomePhoto.addEventListener('change', (e) => {
+    const file = e.target.files[0];
+    if (file) {
+        const reader = new FileReader();
+        reader.onload = function(evt) {
+            incomePhotoPreview.src = evt.target.result;
+            incomePhotoPreview.style.display = 'block';
+        };
+        reader.readAsDataURL(file);
+    } else {
+        incomePhotoPreview.style.display = 'none';
+    }
+});
+incomeForm.addEventListener('submit', (e) => {
+    e.preventDefault();
+    const date = document.getElementById('incomeDate').value;
+    const amount = document.getElementById('incomeAmount').value;
+    const sender = document.getElementById('incomeSender').value;
+    const receiver = document.getElementById('incomeReceiver').value;
+    let photo = '';
+    if (incomePhotoPreview.src && incomePhotoPreview.style.display === 'block') {
+        photo = incomePhotoPreview.src;
+    }
+    const savedData = JSON.parse(localStorage.getItem('incomeData')) || [];
+    const editIndex = incomeModal.dataset.editIndex;
+    if (editIndex && editIndex !== 'null') {
+        savedData[editIndex] = { date, amount, sender, receiver, photo };
+    } else {
+        savedData.push({ date, amount, sender, receiver, photo });
+    }
+    localStorage.setItem('incomeData', JSON.stringify(savedData));
+    incomeModal.style.display = 'none';
+    renderIncomeTable();
+});
+
+function renderIncomeTable() {
+    incomeTableBody.innerHTML = '';
+    const savedData = JSON.parse(localStorage.getItem('incomeData')) || [];
+    savedData.forEach((data, index) => {
+        const newRow = document.createElement('tr');
+        newRow.innerHTML = `
+            <td>${index + 1}</td>
+            <td>${data.date}</td>
+            <td>${data.photo ? `<img src='${data.photo}' style='max-width:60px;border-radius:6px;'>` : ''}</td>
+            <td>${data.amount}</td>
+            <td>${data.sender}</td>
+            <td>${data.receiver}</td>
+            <td><button class="btn btn-secondary edit-income">Изменить</button></td>
+        `;
+        newRow.querySelector('.edit-income').addEventListener('click', () => openIncomeModal(index));
+        incomeTableBody.appendChild(newRow);
+    });
+}
+renderIncomeTable();

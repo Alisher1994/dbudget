@@ -358,38 +358,38 @@
 
     <!-- Модальное окно для добавления/редактирования прихода -->
     <div id="incomeModal" class="modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h3>Добавить/Изменить Приход</h3>
-                <button id="closeIncomeModal" class="close">&times;</button>
-            </div>
-            <form id="incomeForm">
-                <div class="form-group">
-                    <label for="incomeDate">Дата</label>
-                    <input type="date" id="incomeDate" class="form-control">
-                </div>
-                <div class="form-group">
-                    <label for="incomePhoto">Фото</label>
-                    <input type="file" id="incomePhoto" class="form-control" accept="image/*">
-                </div>
-                <div class="form-group">
-                    <label for="incomeAmount">Сумма</label>
-                    <input type="number" id="incomeAmount" class="form-control" placeholder="Сумма">
-                </div>
-                <div class="form-group">
-                    <label for="incomeSender">Кем передан</label>
-                    <input type="text" id="incomeSender" class="form-control" placeholder="Кем передан">
-                </div>
-                <div class="form-group">
-                    <label for="incomeReceiver">Кто получил</label>
-                    <input type="text" id="incomeReceiver" class="form-control" placeholder="Кто получил">
-                </div>
-                <div class="modal-actions">
-                    <button type="button" id="saveIncome" class="btn btn-primary">Сохранить</button>
-                    <button type="button" id="cancelIncome" class="btn btn-secondary">Отмена</button>
-                </div>
-            </form>
+      <div class="modal-content">
+        <div class="modal-header">
+          <h3 id="incomeModalTitle">Добавить приход</h3>
+          <span class="close" id="closeIncomeModal">&times;</span>
         </div>
+        <form id="incomeForm">
+          <div class="form-group">
+            <label for="incomeDate">Дата</label>
+            <input type="date" id="incomeDate" class="form-control" required>
+          </div>
+          <div class="form-group">
+            <label for="incomePhoto">Фото</label>
+            <input type="file" id="incomePhoto" class="form-control" accept="image/*">
+            <img id="incomePhotoPreview" src="" alt="Фото" style="display:none;max-width:100px;margin-top:8px;border-radius:8px;">
+          </div>
+          <div class="form-group">
+            <label for="incomeAmount">Сумма прихода</label>
+            <input type="number" id="incomeAmount" class="form-control" required placeholder="Сумма">
+          </div>
+          <div class="form-group">
+            <label for="incomeSender">Кем передан</label>
+            <input type="text" id="incomeSender" class="form-control" required placeholder="Кем передан">
+          </div>
+          <div class="form-group">
+            <label for="incomeReceiver">Кто получил</label>
+            <input type="text" id="incomeReceiver" class="form-control" required placeholder="Кто получил">
+          </div>
+          <div class="modal-actions">
+            <button type="submit" class="btn btn-primary" id="saveIncomeModal">Сохранить</button>
+          </div>
+        </form>
+      </div>
     </div>
 
     <script src="chart.js"></script>
