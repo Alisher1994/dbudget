@@ -98,14 +98,17 @@ function renderResourceGaugeChart(ctx, label, plan, fact, i) {
     const over = fact > plan;
     const factColor = over ? '#ff9500' : '#34c759';
     const planColor = '#e0e0e0';
-    // Название сверху (в разметке)
-    // Легенда и суммы под чартом
+    // Легенда
     const legendDiv = document.getElementById('resourceLegend' + i);
     if (legendDiv) {
-        legendDiv.innerHTML = `<span class=\"chart-legend-item\"><span class=\"chart-legend-color\" style=\"background:${planColor}\"></span>План</span><span class=\"chart-legend-item\"><span class=\"chart-legend-color\" style=\"background:${factColor}\"></span>Факт</span>` +
-            `<div class=\"resource-sums-block\"><div class=\"resource-sum\">План: ${formatSum(plan)}</div><div class=\"resource-sum\">Факт: ${formatSum(fact)}</div></div>`;
+        legendDiv.innerHTML = `<span class=\"chart-legend-item\"><span class=\"chart-legend-color\" style=\"background:${planColor}\"></span>План</span><span class=\"chart-legend-item\"><span class=\"chart-legend-color\" style=\"background:${factColor}\"></span>Факт</span>`;
     }
-    // Gauge chart без текста внутри
+    // Суммы под чартом
+    const sumBlock = document.getElementById('resourceSumsBlock' + i);
+    if (sumBlock) {
+        sumBlock.innerHTML = `<div class=\"resource-sum plan-sum\">План: ${formatSum(plan)}</div><div class=\"resource-sum fact-sum\">Факт: ${formatSum(fact)}</div>`;
+    }
+    // Gauge chart с названием сверху
     new Chart(ctx, {
         type: 'doughnut',
         data: {
@@ -123,6 +126,13 @@ function renderResourceGaugeChart(ctx, label, plan, fact, i) {
             plugins: {
                 legend: { display: false },
                 tooltip: { enabled: false },
+                title: {
+                    display: true,
+                    text: label,
+                    align: 'center',
+                    color: '#222',
+                    font: { size: 16, weight: 'bold', family: 'Segoe UI' }
+                }
             },
             responsive: true,
             aspectRatio: 2,

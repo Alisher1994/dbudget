@@ -634,9 +634,16 @@ body {
     display: flex;
     flex-direction: column;
     gap: 2px;
-    font-size: 14px;
+    font-size: 15px;
     color: var(--text-primary);
     font-weight: 500;
+    word-break: break-all;
+}
+.plan-sum {
+    color: #888;
+}
+.fact-sum {
+    color: #34c759;
 }
 @media (max-width: 900px) {
     .resource-charts-grid {
