@@ -197,63 +197,51 @@ function renderResourceGaugeChart(ctx, label, plan, fact, i) {
 }
 
 function renderResourceChart(ctx, label, plan, fact) {
-    const colors = ['#d3d3d3', '#34c759'];
-    new Chart(ctx, {
-        type: 'bar',
-        data: {
-            labels: ['План', 'Факт'],
-            datasets: [{
-                data: [plan, fact],
-                backgroundColor: colors,
-                borderRadius: 6,
-                borderSkipped: false,
-                barPercentage: 0.8,
-                categoryPercentage: 0.8,
-                maxBarThickness: 28,
-            }]
-        },
-        options: {
-            indexAxis: 'y',
-            plugins: {
-                legend: { display: false },
-                title: { display: false },
-                datalabels: { display: false }
-            },
-            responsive: true,
-            aspectRatio: 2.5,
-            animation: false,
-            scales: {
-                x: {
-                    beginAtZero: true,
-                    grid: { color: '#eee' },
-                    ticks: { font: { size: 14 } }
-                },
-                y: {
-                    grid: { display: false },
-                    ticks: { font: { size: 15, weight: 'bold' } }
-                }
-            }
-        },
-        plugins: [{
-            id: 'barLabels',
-            afterDatasetsDraw: chart => {
-                const { ctx, chartArea, data } = chart;
-                const meta = chart.getDatasetMeta(0);
-                meta.data.forEach((bar, i) => {
-                    const value = formatSum(data.datasets[0].data[i]);
-                    const x = bar.x - 16;
-                    const y = bar.y;
-                    ctx.save();
-                    ctx.font = 'bold 12px Segoe UI';
-                    ctx.textAlign = 'center';
-                    ctx.textBaseline = 'middle';
-                    ctx.fillStyle = i === 1 ? '#fff' : '#555';
-                    ctx.fillText(value, bar.x - bar.width / 2, bar.y);
-                    ctx.restore();
-                });
-            }
-        }]
-    });
+    // Верхняя линия — факт, нижняя — план
+    const barHeight = 18;
+    const gap = 12;
+    const width = ctx.canvas.width;
+    const height = ctx.canvas.height;
+    ctx.clearRect(0, 0, width, height);
+    // Нижняя линия (план)
+    ctx.save();
+    ctx.fillStyle = '#e0e0e0';
+    ctx.beginPath();
+    ctx.moveTo(12, barHeight + gap);
+    ctx.lineTo(width - 12, barHeight + gap);
+    ctx.arcTo(width - 2, barHeight + gap, width - 2, barHeight * 2 + gap, 7);
+    ctx.lineTo(width - 2, barHeight * 2 + gap);
+    ctx.lineTo(12, barHeight * 2 + gap);
+    ctx.arcTo(2, barHeight * 2 + gap, 2, barHeight + gap, 7);
+    ctx.closePath();
+    ctx.fill();
+    // Сумма плана внутри линии
+    ctx.font = '12px Segoe UI';
+    ctx.fillStyle = '#555';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(`План: ${formatSum(plan)}`, width / 2, barHeight * 1.5 + gap);
+    ctx.restore();
+    // Верхняя линия (факт)
+    const factWidth = Math.max(32, (width - 24) * (fact / Math.max(plan, fact, 1)));
+    ctx.save();
+    ctx.fillStyle = '#34c759';
+    ctx.beginPath();
+    ctx.moveTo(12, gap);
+    ctx.lineTo(factWidth + 12, gap);
+    ctx.arcTo(factWidth + 22, gap, factWidth + 22, barHeight + gap, 7);
+    ctx.lineTo(factWidth + 22, barHeight + gap);
+    ctx.lineTo(12, barHeight + gap);
+    ctx.arcTo(2, barHeight + gap, 2, gap, 7);
+    ctx.closePath();
+    ctx.fill();
+    // Сумма факта внутри линии
+    ctx.font = '12px Segoe UI';
+    ctx.fillStyle = '#fff';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(`Факт: ${formatSum(fact)}`, factWidth / 2 + 12, barHeight / 2 + gap);
+    ctx.restore();
 }
 
 window.renderAnalysisCharts = function(role) {
