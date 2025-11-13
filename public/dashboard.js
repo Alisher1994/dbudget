@@ -946,3 +946,14 @@ function switchSubTab(subtabName) {
         }, 50);
     }
 }
+
+async function fetchIncomeDetails() {
+    try {
+        const response = await fetch(`/api/income`);
+        if (!response.ok) throw new Error('Ошибка загрузки');
+        return await response.json();
+    } catch (error) {
+        console.error('Ошибка загрузки данных:', error);
+        throw error;
+    }
+}

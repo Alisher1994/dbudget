@@ -13,7 +13,7 @@ function formatSum(val) {
 }
 
 // Финансовый анализ
-function renderFinanceChart(ctx, role) {
+async function renderFinanceChart(ctx, role) {
     // Проверяем, загружен ли Chart.js
     if (!window.Chart) {
         console.warn('Chart.js еще не загружен, ожидаем...');
