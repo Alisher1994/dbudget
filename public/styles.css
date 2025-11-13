@@ -1081,6 +1081,31 @@ body {
     font-size: 14px;
 }
 
+/* Mobile object card: transfer block */
+.object-card-transfer {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    margin-top: 10px;
+}
+.object-card-transfer .income-photo-preview {
+    width: 56px;
+    height: 40px;
+}
+.object-card-transfer .transfer-info {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+.object-card-transfer .transfer-amount {
+    font-weight: 700;
+    color: var(--text-primary);
+}
+.object-card-transfer .transfer-meta {
+    font-size: 13px;
+    color: var(--text-secondary);
+}
+
 button.edit-btn, button.delete-btn {
     height: 40px;
     font-size: 14px;

@@ -165,7 +165,8 @@ function setupEventListeners() {
         const photoFile = photoInput.files[0];
         const photo = await readFileAsDataURL(photoFile);
 
-        const incomeData = { date, photo, amount, sender, receiver };
+        // Привязываем приход к текущему объекту, если он открыт
+        const incomeData = { date, photo, amount, sender, receiver, object_id: currentObjectId || null };
 
         const savedData = JSON.parse(localStorage.getItem('incomeData')) || [];
         if (editingIncomeIndex === null) {
@@ -394,9 +395,17 @@ function renderObjects() {
     }).join('');
 
     // Рендерим карточки для мобильных
+    const savedIncome = JSON.parse(localStorage.getItem('incomeData')) || [];
     cardsContainer.innerHTML = currentObjects.map(obj => {
         const photoUrl = obj.photo || 'https://via.placeholder.com/300x200?text=No+Image';
-        
+
+        // Найдём последние записи прихода, привязанные к объекту
+        const incomesForObj = savedIncome.filter(i => (i.object_id || null) == obj.id);
+        const lastIncome = incomesForObj.length ? incomesForObj[incomesForObj.length - 1] : null;
+
+        // Показать блок передачи только если текущий пользователь — клиент и закреплён за этим объектом
+        const showTransfer = currentUser && currentUser.role === 'client' && (obj.client_id == currentUser.id);
+
         return `
             <div class="object-card" onclick="openObjectDetail(${obj.id})">
                 <div class="object-card-image" style="background-image: url('${photoUrl}');"></div>
@@ -404,6 +413,15 @@ function renderObjects() {
                     <h3 class="object-card-title">${obj.name}</h3>
                     <div class="object-card-info">
                         ${obj.address ? `<p class="object-card-address">${obj.address}</p>` : ''}
+                        ${showTransfer && lastIncome ? `
+                            <div class="object-card-transfer">
+                                <img src="${lastIncome.photo || ''}" class="income-photo-preview" alt="Фото передачи">
+                                <div class="transfer-info">
+                                    <div class="transfer-amount">${formatMoney(lastIncome.amount)}</div>
+                                    <div class="transfer-meta">${formatDate(lastIncome.date)} • ${lastIncome.receiver || ''}</div>
+                                </div>
+                            </div>
+                        ` : ''}
                     </div>
                 </div>
             </div>
