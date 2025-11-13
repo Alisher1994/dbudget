@@ -399,8 +399,24 @@ function renderObjects() {
     cardsContainer.innerHTML = currentObjects.map(obj => {
         const photoUrl = obj.photo || 'https://via.placeholder.com/300x200?text=No+Image';
 
-        // Найдём последние записи прихода, привязанные к объекту
-        const incomesForObj = savedIncome.filter(i => (i.object_id || null) == obj.id);
+        // Найдём последние записи прихода, привязанные к объекту.
+        // Если записи старые и не имеют object_id, попробуем сопоставить по имени клиента (client_name)
+        const incomesForObj = savedIncome.filter(i => {
+            if ((i.object_id || null) == obj.id) return true;
+            // Если объект имеет назначенного клиента, проверим совпадение по имени
+            if (obj.client_name) {
+                const name = (obj.client_name || '').toString().toLowerCase();
+                if ((i.sender || '').toString().toLowerCase().includes(name)) return true;
+                if ((i.receiver || '').toString().toLowerCase().includes(name)) return true;
+            }
+            // Если текущий пользователь — клиент, сверим по его username
+            if (currentUser && currentUser.role === 'client' && currentUser.username) {
+                const uname = currentUser.username.toString().toLowerCase();
+                if ((i.sender || '').toString().toLowerCase().includes(uname)) return true;
+                if ((i.receiver || '').toString().toLowerCase().includes(uname)) return true;
+            }
+            return false;
+        });
         const lastIncome = incomesForObj.length ? incomesForObj[incomesForObj.length - 1] : null;
 
         // Показать блок передачи только если текущий пользователь — клиент и закреплён за этим объектом
