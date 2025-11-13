@@ -1,0 +1,18 @@
+# Быстрая инициализация Git и публикация на GitHub
+
+# 1. Инициализация Git
+git init
+git add .
+git commit -m "Initial commit: DBudget app"
+
+# 2. Создайте репозиторий на GitHub: https://github.com/new
+# Назовите его "dbudget" или любым другим именем
+
+# 3. Подключите удаленный репозиторий (замените YOUR_USERNAME на ваш логин GitHub)
+git remote add origin https://github.com/YOUR_USERNAME/dbudget.git
+
+# 4. Отправьте код на GitHub
+git branch -M main
+git push -u origin main
+
+# Готово! Теперь можно переходить к настройке Railway по инструкции RAILWAY_SETUP.md

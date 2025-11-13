@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DBudget - Панель управления</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="app-container">
+        <header class="header">
+            <h1>DBudget</h1>
+            <div class="user-info">
+                <span id="userName"></span>
+                <button id="logoutBtn" class="btn btn-secondary">Выйти</button>
+            </div>
+        </header>
+
+        <nav class="tabs">
+            <button class="tab-button active" data-tab="objects">Объекты</button>
+            <button class="tab-button" data-tab="users" id="usersTab">Пользователи</button>
+        </nav>
+
+        <main class="content">
+            <!-- Вкладка Объекты -->
+            <div id="objects-tab" class="tab-content active">
+                <div class="tab-header">
+                    <h2>Объекты ремонта</h2>
+                    <button id="addObjectBtn" class="btn btn-primary">+ Добавить объект</button>
+                </div>
+
+                <div class="table-container">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Название</th>
+                                <th>Адрес</th>
+                                <th>Бюджет</th>
+                                <th>Потрачено</th>
+                                <th>Остаток</th>
+                                <th>Клиент</th>
+                                <th class="actions-col">Действия</th>
+                            </tr>
+                        </thead>
+                        <tbody id="objectsTableBody">
+                            <tr>
+                                <td colspan="7" class="empty-state">Загрузка...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Вкладка Пользователи -->
+            <div id="users-tab" class="tab-content">
+                <div class="tab-header">
+                    <h2>Пользователи</h2>
+                    <button id="addUserBtn" class="btn btn-primary">+ Добавить пользователя</button>
+                </div>
+
+                <div class="table-container">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Логин</th>
+                                <th>Роль</th>
+                                <th>Дата создания</th>
+                                <th class="actions-col">Действия</th>
+                            </tr>
+                        </thead>
+                        <tbody id="usersTableBody">
+                            <tr>
+                                <td colspan="4" class="empty-state">Загрузка...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Модальное окно для добавления/редактирования объекта -->
+    <div id="objectModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="objectModalTitle">Добавить объект</h3>
+                <span class="close">&times;</span>
+            </div>
+            <form id="objectForm">
+                <div class="form-group">
+                    <label>Название</label>
+                    <input type="text" id="objectName" required>
+                </div>
+                <div class="form-group">
+                    <label>Адрес</label>
+                    <input type="text" id="objectAddress">
+                </div>
+                <div class="form-group">
+                    <label>Бюджет (₽)</label>
+                    <input type="number" id="objectBudget" step="0.01" value="0">
+                </div>
+                <div class="form-group" id="spentGroup">
+                    <label>Потрачено (₽)</label>
+                    <input type="number" id="objectSpent" step="0.01" value="0">
+                </div>
+                <div class="form-group">
+                    <label>Клиент</label>
+                    <select id="objectClient">
+                        <option value="">Не назначен</option>
+                    </select>
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="btn btn-secondary" id="cancelObjectBtn">Отмена</button>
+                    <button type="submit" class="btn btn-primary">Сохранить</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Модальное окно для добавления пользователя -->
+    <div id="userModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Добавить пользователя</h3>
+                <span class="close">&times;</span>
+            </div>
+            <form id="userForm">
+                <div class="form-group">
+                    <label>Логин</label>
+                    <input type="text" id="userLogin" required>
+                </div>
+                <div class="form-group">
+                    <label>Пароль</label>
+                    <input type="password" id="userPassword" required>
+                </div>
+                <div class="form-group">
+                    <label>Роль</label>
+                    <select id="userRole" required>
+                        <option value="client">Клиент</option>
+                        <option value="admin">Администратор</option>
+                    </select>
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="btn btn-secondary" id="cancelUserBtn">Отмена</button>
+                    <button type="submit" class="btn btn-primary">Создать</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="dashboard.js"></script>
+</body>
+</html>
