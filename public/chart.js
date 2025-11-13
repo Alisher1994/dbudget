@@ -14,6 +14,19 @@ function formatSum(val) {
 
 // Финансовый анализ
 function renderFinanceChart(ctx, role) {
+    // Проверяем, загружен ли Chart.js
+    if (!window.Chart) {
+        console.warn('Chart.js еще не загружен, ожидаем...');
+        setTimeout(() => {
+            if (window.Chart) {
+                renderFinanceChart(ctx, role);
+            } else {
+                console.error('Chart.js не загрузился');
+            }
+        }, 100);
+        return;
+    }
+    
     let labels, data, colors;
     // Берём реальные значения прихода из localStorage, чтобы связать вкладку "Приход" с графиком
     const savedIncome = JSON.parse(localStorage.getItem('incomeData')) || [];
@@ -289,8 +302,26 @@ function renderResourceChart(ctx, labels, data) {
 }
 
 window.renderAnalysisCharts = function(role) {
+    // Проверяем, загружен ли Chart.js
+    if (!window.Chart) {
+        console.warn('Chart.js еще не загружен, ожидаем...');
+        setTimeout(() => {
+            if (window.Chart) {
+                window.renderAnalysisCharts(role);
+            } else {
+                console.error('Chart.js не загрузился');
+            }
+        }, 100);
+        return;
+    }
+    
     // Финансы
-    const financeCtx = document.getElementById('financeBarChart').getContext('2d');
+    const financeCanvas = document.getElementById('financeBarChart');
+    if (!financeCanvas) {
+        console.warn('Canvas financeBarChart не найден');
+        return;
+    }
+    const financeCtx = financeCanvas.getContext('2d');
     renderFinanceChart(financeCtx, role);
     // Ресурсы
     const resources = [

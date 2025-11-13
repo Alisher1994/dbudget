@@ -277,7 +277,7 @@ function setupEventListeners() {
         const incomeTableDesktop = document.querySelector('.income-table-desktop');
         
         if (!incomeTableBody || !incomeCardsMobile) {
-            console.error('Элементы для отображения прихода не найдены', { incomeTableBody, incomeCardsMobile });
+            console.warn('Элементы для отображения прихода не найдены', { incomeTableBody, incomeCardsMobile });
             return;
         }
         
@@ -286,6 +286,7 @@ function setupEventListeners() {
         try {
             const stored = localStorage.getItem('incomeData');
             savedData = stored ? JSON.parse(stored) : [];
+            console.log('Загружено данных прихода:', savedData.length);
         } catch (e) {
             console.error('Ошибка чтения данных прихода:', e);
             savedData = [];
@@ -854,8 +855,10 @@ function openObjectDetail(objectId) {
         if (window.renderAnalysisCharts) {
             window.renderAnalysisCharts(currentUser.role);
         }
-        // Обновляем таблицу прихода для мобильного клиента
-        if (window.loadIncomeData) window.loadIncomeData();
+        // Обновляем таблицу прихода, если открыта вкладка прихода
+        setTimeout(() => {
+            if (window.loadIncomeData) window.loadIncomeData();
+        }, 100);
     }, 300);
 }
 
@@ -918,7 +921,12 @@ function switchSubTab(subtabName) {
     document.getElementById(`${subtabName}-subtab`)?.classList.add('active');
     
     // Если переключились на вкладку "Приход", загружаем данные
-    if (subtabName === 'income' && window.loadIncomeData) {
-        window.loadIncomeData();
+    if (subtabName === 'income') {
+        // Небольшая задержка, чтобы DOM успел обновиться
+        setTimeout(() => {
+            if (window.loadIncomeData) {
+                window.loadIncomeData();
+            }
+        }, 50);
     }
 }
