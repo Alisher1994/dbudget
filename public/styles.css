@@ -1133,6 +1133,10 @@ button.delete-btn {
     gap: 16px;
 }
 
+.income-cards-mobile.show {
+    display: flex;
+}
+
 .income-card {
     background: var(--bg-primary);
     border-radius: 12px;
@@ -1188,10 +1192,10 @@ button.delete-btn {
 
 @media (max-width: 768px) {
     .income-table-desktop {
-        display: none;
+        display: none !important;
     }
 
     .income-cards-mobile {
-        display: flex;
+        display: flex !important;
     }
 }

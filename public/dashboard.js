@@ -274,12 +274,24 @@ function setupEventListeners() {
     window.loadIncomeData = () => {
         const incomeTableBody = document.getElementById('incomeTableBody');
         const incomeCardsMobile = document.getElementById('incomeCardsMobile');
-        if (!incomeTableBody || !incomeCardsMobile) return;
+        const incomeTableDesktop = document.querySelector('.income-table-desktop');
+        
+        if (!incomeTableBody || !incomeCardsMobile) {
+            console.error('Элементы для отображения прихода не найдены', { incomeTableBody, incomeCardsMobile });
+            return;
+        }
         
         incomeTableBody.innerHTML = '';
-        let savedData = JSON.parse(localStorage.getItem('incomeData')) || [];
+        let savedData = [];
+        try {
+            const stored = localStorage.getItem('incomeData');
+            savedData = stored ? JSON.parse(stored) : [];
+        } catch (e) {
+            console.error('Ошибка чтения данных прихода:', e);
+            savedData = [];
+        }
         
-        // Фильтруем данные для клиентов
+        // Для админа показываем все данные, для клиентов фильтруем
         if (currentUser && currentUser.role === 'client') {
             if (currentObjectId) {
                 // Если клиент на странице объекта, показываем только данные этого объекта
@@ -336,81 +348,102 @@ function setupEventListeners() {
             addIncomeBtn.style.display = isClient ? 'none' : 'block';
         }
         
-        // Рендерим таблицу для десктопа
+        // Определяем, что показывать: таблицу или карточки
+        const isMobile = window.innerWidth <= 768;
+        const showCards = isClient || isMobile; // Клиент всегда видит карточки, админ на мобилке тоже
+        
+        // Показываем/скрываем таблицу и карточки
+        if (incomeTableDesktop) {
+            incomeTableDesktop.style.display = showCards ? 'none' : 'block';
+        }
+        if (incomeCardsMobile) {
+            if (showCards) {
+                incomeCardsMobile.classList.add('show');
+            } else {
+                incomeCardsMobile.classList.remove('show');
+            }
+        }
+        
+        // Рендерим таблицу для десктопа (админ)
         if (savedData.length === 0) {
             incomeTableBody.innerHTML = '<tr><td colspan="7" class="empty-state">Нет данных</td></tr>';
             incomeCardsMobile.innerHTML = '<div class="empty-state">Нет данных</div>';
             return;
         }
         
-        savedData.forEach((data, index) => {
-            const newRow = document.createElement('tr');
-            newRow.innerHTML = `
-                <td>${index + 1}</td>
-                <td>${data.date}</td>
-                <td>${data.photo ? `<img src="${data.photo}" alt="Фото" class="income-photo-preview">` : 'Нет фото'}</td>
-                <td>${formatMoney(data.amount)}</td>
-                <td>${data.sender}</td>
-                <td>${data.receiver}</td>
-                <td>
-                    ${showActions ? `
-                        <button class="edit-btn edit-income">Изменить</button>
-                        <button class="delete-btn delete-income">Удалить</button>
-                    ` : '—'}
-                </td>
-            `;
-            incomeTableBody.appendChild(newRow);
-        });
+        // Рендерим таблицу для десктопа (только для админа на десктопе)
+        if (!showCards) {
+            savedData.forEach((data, index) => {
+                const newRow = document.createElement('tr');
+                newRow.innerHTML = `
+                    <td>${index + 1}</td>
+                    <td>${data.date}</td>
+                    <td>${data.photo ? `<img src="${data.photo}" alt="Фото" class="income-photo-preview">` : 'Нет фото'}</td>
+                    <td>${formatMoney(data.amount)}</td>
+                    <td>${data.sender}</td>
+                    <td>${data.receiver}</td>
+                    <td>
+                        ${showActions ? `
+                            <button class="edit-btn edit-income">Изменить</button>
+                            <button class="delete-btn delete-income">Удалить</button>
+                        ` : '—'}
+                    </td>
+                `;
+                incomeTableBody.appendChild(newRow);
+            });
+        }
         
-        // Рендерим карточки для мобильных
-        incomeCardsMobile.innerHTML = savedData.map((data, index) => {
-            const photoUrl = data.photo || '';
-            return `
-                <div class="income-card">
-                    ${photoUrl ? `<img src="${photoUrl}" alt="Фото" class="income-card-image" data-photo-src="${photoUrl}" data-photo-date="${data.date}" data-photo-sender="${data.sender}" data-photo-amount="${data.amount}">` : ''}
-                    <div class="income-card-content">
-                        <div class="income-card-date">${data.date}</div>
-                        <div class="income-card-amount">${formatMoney(data.amount)}</div>
-                        <div class="income-card-info">
-                            <div class="income-card-info-item">
-                                <span class="income-card-info-label">Кем передан:</span>
-                                <span>${data.sender || '—'}</span>
-                            </div>
-                            <div class="income-card-info-item">
-                                <span class="income-card-info-label">Кто получил:</span>
-                                <span>${data.receiver || '—'}</span>
+        // Рендерим карточки (для клиентов всегда, для админа на мобилке)
+        if (showCards) {
+            incomeCardsMobile.innerHTML = savedData.map((data, index) => {
+                const photoUrl = data.photo || '';
+                return `
+                    <div class="income-card">
+                        ${photoUrl ? `<img src="${photoUrl}" alt="Фото" class="income-card-image" data-photo-src="${photoUrl}" data-photo-date="${data.date}" data-photo-sender="${data.sender}" data-photo-amount="${data.amount}">` : ''}
+                        <div class="income-card-content">
+                            <div class="income-card-date">${data.date}</div>
+                            <div class="income-card-amount">${formatMoney(data.amount)}</div>
+                            <div class="income-card-info">
+                                <div class="income-card-info-item">
+                                    <span class="income-card-info-label">Кем передан:</span>
+                                    <span>${data.sender || '—'}</span>
+                                </div>
+                                <div class="income-card-info-item">
+                                    <span class="income-card-info-label">Кто получил:</span>
+                                    <span>${data.receiver || '—'}</span>
+                                </div>
                             </div>
                         </div>
                     </div>
-                </div>
-            `;
-        }).join('');
-        
-        // Добавляем обработчики клика на фото в карточках
-        incomeCardsMobile.querySelectorAll('.income-card-image').forEach(img => {
-            img.style.cursor = 'pointer';
-            img.addEventListener('click', () => {
-                const photoModal = document.getElementById('photoPreviewModal');
-                const photoImg = document.getElementById('photoPreviewImg');
-                const photoCaption = document.getElementById('photoPreviewCaption');
-                const closeBtn = document.getElementById('closePhotoPreview');
-                
-                if (photoImg) photoImg.src = img.dataset.photoSrc || '';
-                if (photoCaption) {
-                    const date = img.dataset.photoDate || '';
-                    const sender = img.dataset.photoSender || '';
-                    const amount = img.dataset.photoAmount || '';
-                    photoCaption.textContent = `${date} • ${sender} • ${formatMoney(amount)}`;
-                }
-                if (photoModal) photoModal.classList.add('active');
-                
-                // Close handlers
-                if (closeBtn) closeBtn.onclick = () => photoModal.classList.remove('active');
-                if (photoModal) photoModal.onclick = (e) => { 
-                    if (e.target.id === 'photoPreviewModal') photoModal.classList.remove('active'); 
-                };
+                `;
+            }).join('');
+            
+            // Добавляем обработчики клика на фото в карточках
+            incomeCardsMobile.querySelectorAll('.income-card-image').forEach(img => {
+                img.style.cursor = 'pointer';
+                img.addEventListener('click', () => {
+                    const photoModal = document.getElementById('photoPreviewModal');
+                    const photoImg = document.getElementById('photoPreviewImg');
+                    const photoCaption = document.getElementById('photoPreviewCaption');
+                    const closeBtn = document.getElementById('closePhotoPreview');
+                    
+                    if (photoImg) photoImg.src = img.dataset.photoSrc || '';
+                    if (photoCaption) {
+                        const date = img.dataset.photoDate || '';
+                        const sender = img.dataset.photoSender || '';
+                        const amount = img.dataset.photoAmount || '';
+                        photoCaption.textContent = `${date} • ${sender} • ${formatMoney(amount)}`;
+                    }
+                    if (photoModal) photoModal.classList.add('active');
+                    
+                    // Close handlers
+                    if (closeBtn) closeBtn.onclick = () => photoModal.classList.remove('active');
+                    if (photoModal) photoModal.onclick = (e) => { 
+                        if (e.target.id === 'photoPreviewModal') photoModal.classList.remove('active'); 
+                    };
+                });
             });
-        });
+        }
     };
 
     window.loadIncomeData();
@@ -858,6 +891,17 @@ document.addEventListener('DOMContentLoaded', () => {
             window.renderAnalysisCharts(currentUser?.role || 'admin');
         }
     }, 500);
+    
+    // Обработчик изменения размера окна для переключения между таблицей и карточками
+    let resizeTimeout;
+    window.addEventListener('resize', () => {
+        clearTimeout(resizeTimeout);
+        resizeTimeout = setTimeout(() => {
+            if (window.loadIncomeData) {
+                window.loadIncomeData();
+            }
+        }, 250);
+    });
 });
 
 function switchSubTab(subtabName) {
