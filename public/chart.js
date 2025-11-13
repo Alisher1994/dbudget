@@ -132,77 +132,128 @@ function renderResourceColumnChart(ctx, label, plan, fact, i) {
 }
 
 function renderResourceGaugeChart(ctx, label, plan, fact, i) {
-    // Рисуем две отдельные горизонтальные полосы: План и Факт
     const over = fact > plan;
     const factColor = over ? '#ff9500' : '#34c759';
-    const planColor = '#e6e6e6';
-    // Название сверху (внесено в DOM отдельно)
+    const planColor = '#e0e0e0';
+    // Название сверху
+    new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: [''],
+            datasets: [
+                {
+                    label: 'План',
+                    data: [plan],
+                    backgroundColor: planColor,
+                    borderRadius: 20,
+                    barPercentage: 1.0,
+                    categoryPercentage: 1.0,
+                },
+                {
+                    label: 'Факт',
+                    data: [Math.min(fact, plan)],
+                    backgroundColor: factColor,
+                    borderRadius: 20,
+                    barPercentage: 1.0,
+                    categoryPercentage: 1.0,
+                }
+            ]
+        },
+        options: {
+            indexAxis: 'x',
+            plugins: {
+                legend: { display: false },
+                title: {
+                    display: true,
+                    text: label,
+                    align: 'center',
+                    color: '#222',
+                    font: { size: 16, weight: 'bold' },
+                    padding: { top: 10, bottom: 0 }
+                }
+            },
+            responsive: true,
+            aspectRatio: 4,
+            animation: false,
+            scales: {
+                x: {
+                    display: false,
+                    stacked: true,
+                    min: 0,
+                    max: plan,
+                },
+                y: {
+                    display: false,
+                    stacked: true,
+                }
+            }
+        }
+    });
+    // Суммы под чартом
+    const sumBlock = document.getElementById('resourceSumsBlock' + i);
+    if (sumBlock) {
+        sumBlock.innerHTML = `<div class=\"resource-sum-plan\">План: <span>${formatSum(plan)}</span></div><div class=\"resource-sum-fact\">Факт: <span>${formatSum(fact)}</span></div>`;
+    }
+}
+
+function renderResourceChart(ctx, label, plan, fact) {
+    const colors = ['#d3d3d3', '#34c759'];
     new Chart(ctx, {
         type: 'bar',
         data: {
             labels: ['План', 'Факт'],
             datasets: [{
                 data: [plan, fact],
-                backgroundColor: [planColor, factColor],
-                borderRadius: 8,
+                backgroundColor: colors,
+                borderRadius: 6,
                 borderSkipped: false,
-                barPercentage: 0.7,
-                categoryPercentage: 0.6,
-                maxBarThickness: 18,
+                barPercentage: 0.8,
+                categoryPercentage: 0.8,
+                maxBarThickness: 28,
             }]
         },
         options: {
             indexAxis: 'y',
             plugins: {
                 legend: { display: false },
-                title: { display: false }
+                title: { display: false },
+                datalabels: { display: false }
             },
             responsive: true,
+            aspectRatio: 2.5,
             animation: false,
-            maintainAspectRatio: false,
             scales: {
                 x: {
                     beginAtZero: true,
-                    grid: { display: false }
+                    grid: { color: '#eee' },
+                    ticks: { font: { size: 14 } }
                 },
                 y: {
                     grid: { display: false },
-                    ticks: { font: { size: 14, weight: '600' } }
+                    ticks: { font: { size: 15, weight: 'bold' } }
                 }
-            },
-            layout: {
-                padding: { top: 8, bottom: 8 }
             }
         },
         plugins: [{
-            id: 'resourceBarLabels',
+            id: 'barLabels',
             afterDatasetsDraw: chart => {
-                const { ctx } = chart;
+                const { ctx, chartArea, data } = chart;
                 const meta = chart.getDatasetMeta(0);
-                meta.data.forEach((bar, idx) => {
-                    const val = chart.data.datasets[0].data[idx];
-                    const txt = formatSum(val);
-                    // цвет текста: белый для зелёного/оранжевого факта, тёмно-серый для серого плана
-                    const bg = chart.data.datasets[0].backgroundColor[idx];
-                    const isGreen = String(bg).toLowerCase() === '#34c759' || String(bg).toLowerCase() === '#30d158' || String(bg).toLowerCase() === '#ff9500';
-                    ctx.save();
-                    ctx.font = '12px Segoe UI';
-                    ctx.textBaseline = 'middle';
-                    ctx.textAlign = 'right';
-                    const x = Math.min(bar.x - 8, chart.chartArea.right - 8);
+                meta.data.forEach((bar, i) => {
+                    const value = formatSum(data.datasets[0].data[i]);
+                    const x = bar.x - 16;
                     const y = bar.y;
-                    ctx.fillStyle = isGreen ? '#ffffff' : '#444';
-                    ctx.fillText(txt, x, y);
+                    ctx.save();
+                    ctx.font = 'bold 12px Segoe UI';
+                    ctx.textAlign = 'center';
+                    ctx.textBaseline = 'middle';
+                    ctx.fillStyle = i === 1 ? '#fff' : '#555';
+                    ctx.fillText(value, bar.x - bar.width / 2, bar.y);
                     ctx.restore();
                 });
             }
         }]
     });
-    // Суммы под чартом (план/факт) — показываем под заголовком карточки
-    const sumBlock = document.getElementById('resourceSumsBlock' + i);
-    if (sumBlock) {
-        sumBlock.innerHTML = `<div class="resource-sum-plan">План: <span>${formatSum(plan)}</span></div><div class=\"resource-sum-fact\">Факт: <span>${formatSum(fact)}</span></div>`;
-    }
 }
 
 window.renderAnalysisCharts = function(role) {
