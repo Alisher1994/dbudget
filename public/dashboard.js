@@ -563,6 +563,17 @@ function switchSubTab(subtabName) {
     document.getElementById(`${subtabName}-subtab`)?.classList.add('active');
 }
 
+// --- Chart.js destroy fix ---
+let financeChartInstance = null;
+function renderFinanceChart(ctx, role) {
+    if (financeChartInstance) {
+        financeChartInstance.destroy();
+    }
+    // ...existing code chart creation...
+    financeChartInstance = new Chart(ctx, { /* ...chart config... */ });
+}
+// --- End Chart.js destroy fix ---
+
 // МОДАЛЬНОЕ ОКНО ДЛЯ ПРИХОДА
 const incomeModal = document.getElementById('incomeModal');
 const closeIncomeModal = document.getElementById('closeIncomeModal');
@@ -600,19 +611,7 @@ addIncomeBtn.addEventListener('click', () => openIncomeModal());
 closeIncomeModal.addEventListener('click', () => {
     incomeModal.style.display = 'none';
 });
-incomePhoto.addEventListener('change', (e) => {
-    const file = e.target.files[0];
-    if (file) {
-        const reader = new FileReader();
-        reader.onload = function(evt) {
-            incomePhotoPreview.src = evt.target.result;
-            incomePhotoPreview.style.display = 'block';
-        };
-        reader.readAsDataURL(file);
-    } else {
-        incomePhotoPreview.style.display = 'none';
-    }
-});
+
 incomeForm.addEventListener('submit', (e) => {
     e.preventDefault();
     const date = document.getElementById('incomeDate').value;
@@ -622,6 +621,10 @@ incomeForm.addEventListener('submit', (e) => {
     let photo = '';
     if (incomePhotoPreview.src && incomePhotoPreview.style.display === 'block') {
         photo = incomePhotoPreview.src;
+    }
+    if (!date || !amount || !sender || !receiver) {
+        alert('Заполните все поля!');
+        return;
     }
     const savedData = JSON.parse(localStorage.getItem('incomeData')) || [];
     const editIndex = incomeModal.dataset.editIndex;
@@ -639,6 +642,7 @@ function renderIncomeTable() {
     incomeTableBody.innerHTML = '';
     const savedData = JSON.parse(localStorage.getItem('incomeData')) || [];
     savedData.forEach((data, index) => {
+        if (!data.date || !data.amount || !data.sender || !data.receiver) return;
         const newRow = document.createElement('tr');
         newRow.innerHTML = `
             <td>${index + 1}</td>
@@ -654,3 +658,4 @@ function renderIncomeTable() {
     });
 }
 renderIncomeTable();
+// --- End Income modal logic fix ---
