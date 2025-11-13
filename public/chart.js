@@ -28,9 +28,18 @@ function renderFinanceChart(ctx, role) {
     }
     
     let labels, data, colors;
-    // Берём реальные значения прихода из localStorage, чтобы связать вкладку "Приход" с графиком
-    const savedIncome = JSON.parse(localStorage.getItem('incomeData')) || [];
-    const incomeSum = savedIncome.reduce((s, it) => s + (parseFloat(it.amount) || 0), 0);
+    // Берём реальные значения прихода с сервера, чтобы связать вкладку "Приход" с графиком
+    let savedIncome = [];
+    let incomeSum = 0;
+    try {
+        const response = await fetch('/api/income');
+        if (response.ok) {
+            savedIncome = await response.json();
+            incomeSum = savedIncome.reduce((s, it) => s + (parseFloat(it.amount) || 0), 0);
+        }
+    } catch (e) {
+        console.error('Ошибка загрузки прихода для графика:', e);
+    }
 
     if (role === 'admin') {
         labels = ['Бюджет', 'Приход', 'Потрачено', 'Остаток', 'Недостача', 'Экономия'];

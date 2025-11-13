@@ -81,7 +81,7 @@ function setupEventListeners() {
     const saveIncome = document.getElementById('saveIncome');
     const cancelIncome = document.getElementById('cancelIncome');
     const incomeForm = document.getElementById('incomeForm');
-    let editingIncomeIndex = null;
+    let editingIncomeId = null;
 
     const readFileAsDataURL = (file) => new Promise((resolve, reject) => {
         if (!file) return resolve('');
@@ -137,8 +137,13 @@ function setupEventListeners() {
     }
 
     addIncomeBtn.addEventListener('click', () => {
-        editingIncomeIndex = null;
+        editingIncomeId = null;
         incomeForm.reset();
+        const preview = document.querySelector('#incomeModal .photo-preview');
+        if (preview) {
+            preview.src = '';
+            preview.style.display = 'none';
+        }
         incomeModal.classList.add('active');
     });
 
@@ -166,22 +171,59 @@ function setupEventListeners() {
         const photo = await readFileAsDataURL(photoFile);
 
         // Привязываем приход к текущему объекту, если он открыт
-        const incomeData = { date, photo, amount, sender, receiver, object_id: currentObjectId || null };
+        const incomeData = { 
+            date, 
+            photo: photo || null, 
+            amount: parseFloat(amount), 
+            sender, 
+            receiver, 
+            object_id: currentObjectId || null 
+        };
 
-        const savedData = JSON.parse(localStorage.getItem('incomeData')) || [];
-        if (editingIncomeIndex === null) {
-            savedData.push(incomeData);
-        } else {
-            // replace existing
-            savedData[editingIncomeIndex] = incomeData;
+        try {
+            if (editingIncomeId === null) {
+                // Создание новой записи
+                const response = await fetch('/api/income', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(incomeData)
+                });
+
+                if (!response.ok) {
+                    const error = await response.json();
+                    alert(error.error || 'Ошибка сохранения данных');
+                    return;
+                }
+            } else {
+                // Обновление существующей записи
+                const response = await fetch(`/api/income/${editingIncomeId}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(incomeData)
+                });
+
+                if (!response.ok) {
+                    const error = await response.json();
+                    alert(error.error || 'Ошибка обновления данных');
+                    return;
+                }
+            }
+
+            alert('Данные сохранены!');
+            incomeModal.classList.remove('active');
+            incomeForm.reset();
+            editingIncomeId = null;
+            const preview = document.querySelector('#incomeModal .photo-preview');
+            if (preview) {
+                preview.src = '';
+                preview.style.display = 'none';
+            }
+            if (window.loadIncomeData) await window.loadIncomeData();
+            if (window.renderAnalysisCharts) window.renderAnalysisCharts(currentUser?.role || 'admin');
+        } catch (err) {
+            console.error('Ошибка сохранения прихода:', err);
+            alert('Ошибка сохранения данных');
         }
-
-        localStorage.setItem('incomeData', JSON.stringify(savedData));
-
-        alert('Данные сохранены!');
-        incomeModal.classList.remove('active');
-        if (window.loadIncomeData) window.loadIncomeData();
-        if (window.renderAnalysisCharts) window.renderAnalysisCharts(currentUser?.role || 'admin');
     });
 
     const saveIncomeData = (row) => {
@@ -207,42 +249,73 @@ function setupEventListeners() {
         if (window.renderAnalysisCharts) window.renderAnalysisCharts(currentUser?.role || 'admin');
     };
 
-    const deleteIncomeData = (rowIndex) => {
-        const savedData = JSON.parse(localStorage.getItem('incomeData')) || [];
-        savedData.splice(rowIndex, 1);
-        localStorage.setItem('incomeData', JSON.stringify(savedData));
-        if (window.loadIncomeData) window.loadIncomeData();
-        if (window.renderAnalysisCharts) window.renderAnalysisCharts(currentUser?.role || 'admin');
+    const deleteIncomeData = async (incomeId) => {
+        if (!confirm('Вы уверены, что хотите удалить эту запись?')) return;
+
+        try {
+            const response = await fetch(`/api/income/${incomeId}`, {
+                method: 'DELETE'
+            });
+
+            if (!response.ok) {
+                const error = await response.json();
+                alert(error.error || 'Ошибка удаления');
+                return;
+            }
+
+            if (window.loadIncomeData) window.loadIncomeData();
+            if (window.renderAnalysisCharts) window.renderAnalysisCharts(currentUser?.role || 'admin');
+        } catch (err) {
+            console.error('Ошибка удаления прихода:', err);
+            alert('Ошибка удаления данных');
+        }
     };
 
     incomeTableBody.addEventListener('click', (event) => {
         if (event.target.classList.contains('delete-income')) {
-            const rowIndex = event.target.closest('tr').rowIndex - 1; // Учитываем заголовок таблицы
-            deleteIncomeData(rowIndex);
+            const incomeId = event.target.dataset.incomeId;
+            if (incomeId) {
+                deleteIncomeData(incomeId);
+            }
             return;
         }
 
         if (event.target.classList.contains('edit-income')) {
-            const rowIndex = event.target.closest('tr').rowIndex - 1;
-            const savedData = JSON.parse(localStorage.getItem('incomeData')) || [];
-            const data = savedData[rowIndex];
-            if (!data) return;
+            const incomeId = event.target.dataset.incomeId;
+            if (!incomeId) return;
 
-            // Populate modal with existing data
-            document.getElementById('incomeDate').value = data.date || '';
-            document.getElementById('incomeAmount').value = data.amount || '';
-            document.getElementById('incomeSender').value = data.sender || '';
-            document.getElementById('incomeReceiver').value = data.receiver || '';
-            // Note: file inputs cannot be set programmatically for security reasons.
-            // We keep existing photo in preview until user selects a new one.
-            const preview = document.querySelector('#incomeModal .photo-preview');
-            if (preview) {
-                preview.src = data.photo || '';
-                preview.style.display = data.photo ? 'inline-block' : 'none';
+            // Загружаем данные с сервера
+            try {
+                const response = await fetch(`/api/income`);
+                if (!response.ok) throw new Error('Ошибка загрузки');
+                const savedData = await response.json();
+                const data = savedData.find(item => item.id == incomeId);
+                
+                if (!data) {
+                    alert('Запись не найдена');
+                    return;
+                }
+
+                // Populate modal with existing data
+                document.getElementById('incomeDate').value = data.date || '';
+                document.getElementById('incomeAmount').value = data.amount || '';
+                document.getElementById('incomeSender').value = data.sender || '';
+                document.getElementById('incomeReceiver').value = data.receiver || '';
+                
+                // Note: file inputs cannot be set programmatically for security reasons.
+                // We keep existing photo in preview until user selects a new one.
+                const preview = document.querySelector('#incomeModal .photo-preview');
+                if (preview) {
+                    preview.src = data.photo || '';
+                    preview.style.display = data.photo ? 'inline-block' : 'none';
+                }
+
+                editingIncomeId = incomeId;
+                incomeModal.classList.add('active');
+            } catch (err) {
+                console.error('Ошибка загрузки данных для редактирования:', err);
+                alert('Ошибка загрузки данных');
             }
-
-            editingIncomeIndex = rowIndex;
-            incomeModal.classList.add('active');
             return;
         }
 
@@ -271,7 +344,7 @@ function setupEventListeners() {
     });
 
     // Делаем loadIncomeData доступной глобально
-    window.loadIncomeData = () => {
+    window.loadIncomeData = async () => {
         const incomeTableBody = document.getElementById('incomeTableBody');
         const incomeCardsMobile = document.getElementById('incomeCardsMobile');
         const incomeTableDesktop = document.querySelector('.income-table-desktop');
@@ -281,62 +354,25 @@ function setupEventListeners() {
             return;
         }
         
-        incomeTableBody.innerHTML = '';
+        incomeTableBody.innerHTML = '<tr><td colspan="7" class="empty-state">Загрузка...</td></tr>';
+        incomeCardsMobile.innerHTML = '<div class="empty-state">Загрузка...</div>';
+        
         let savedData = [];
         try {
-            const stored = localStorage.getItem('incomeData');
-            savedData = stored ? JSON.parse(stored) : [];
-            console.log('Загружено данных прихода из localStorage:', savedData.length, savedData);
+            // Загружаем данные с сервера
+            const url = `/api/income${currentObjectId ? `?object_id=${currentObjectId}` : ''}`;
+            const response = await fetch(url);
+            if (!response.ok) {
+                throw new Error('Ошибка загрузки данных');
+            }
+            savedData = await response.json();
+            console.log('Загружено данных прихода с сервера:', savedData.length, savedData);
         } catch (e) {
             console.error('Ошибка чтения данных прихода:', e);
             savedData = [];
-        }
-        
-        // Для админа показываем все данные, для клиентов фильтруем
-        if (currentUser && currentUser.role === 'client') {
-            if (currentObjectId) {
-                // Если клиент на странице объекта, показываем только данные этого объекта
-                const currentObj = currentObjects.find(o => o.id == currentObjectId);
-                if (currentObj) {
-                    savedData = savedData.filter(i => {
-                        // Фильтруем по object_id
-                        if ((i.object_id || null) == currentObjectId) return true;
-                        // Если объект имеет назначенного клиента, проверяем совпадение по имени
-                        if (currentObj.client_name) {
-                            const name = (currentObj.client_name || '').toString().toLowerCase();
-                            if ((i.sender || '').toString().toLowerCase().includes(name)) return true;
-                            if ((i.receiver || '').toString().toLowerCase().includes(name)) return true;
-                        }
-                        // Проверяем по username клиента
-                        if (currentUser.username) {
-                            const uname = currentUser.username.toString().toLowerCase();
-                            if ((i.sender || '').toString().toLowerCase().includes(uname)) return true;
-                            if ((i.receiver || '').toString().toLowerCase().includes(uname)) return true;
-                        }
-                        return false;
-                    });
-                }
-            } else {
-                // Если клиент не на странице объекта, показываем все его данные
-                if (currentUser.username) {
-                    const uname = currentUser.username.toString().toLowerCase();
-                    savedData = savedData.filter(i => {
-                        if ((i.sender || '').toString().toLowerCase().includes(uname)) return true;
-                        if ((i.receiver || '').toString().toLowerCase().includes(uname)) return true;
-                        // Также проверяем по объектам клиента
-                        const userObjects = currentObjects.filter(o => o.client_id == currentUser.id);
-                        return userObjects.some(obj => {
-                            if ((i.object_id || null) == obj.id) return true;
-                            if (obj.client_name) {
-                                const name = (obj.client_name || '').toString().toLowerCase();
-                                if ((i.sender || '').toString().toLowerCase().includes(name)) return true;
-                                if ((i.receiver || '').toString().toLowerCase().includes(name)) return true;
-                            }
-                            return false;
-                        });
-                    });
-                }
-            }
+            incomeTableBody.innerHTML = '<tr><td colspan="7" class="empty-state">Ошибка загрузки данных</td></tr>';
+            incomeCardsMobile.innerHTML = '<div class="empty-state">Ошибка загрузки данных</div>';
+            return;
         }
         
         // Определяем, показывать ли кнопки редактирования/удаления
@@ -395,8 +431,8 @@ function setupEventListeners() {
                 <td>${data.receiver || '—'}</td>
                 <td>
                     ${showActions ? `
-                        <button class="edit-btn edit-income">Изменить</button>
-                        <button class="delete-btn delete-income">Удалить</button>
+                        <button class="edit-btn edit-income" data-income-id="${data.id}">Изменить</button>
+                        <button class="delete-btn delete-income" data-income-id="${data.id}">Удалить</button>
                     ` : '—'}
                 </td>
             `;
@@ -518,13 +554,13 @@ async function loadObjects() {
     try {
         const response = await fetch('/api/objects');
         currentObjects = await response.json();
-        renderObjects();
+        await renderObjects();
     } catch (err) {
         console.error('Ошибка загрузки объектов:', err);
     }
 }
 
-function renderObjects() {
+async function renderObjects() {
     const tbody = document.getElementById('objectsTableBody');
     const cardsContainer = document.getElementById('objectsCardsMobile');
     
@@ -564,32 +600,8 @@ function renderObjects() {
     }).join('');
 
     // Рендерим карточки для мобильных
-    const savedIncome = JSON.parse(localStorage.getItem('incomeData')) || [];
     cardsContainer.innerHTML = currentObjects.map(obj => {
         const photoUrl = obj.photo || 'https://via.placeholder.com/300x200?text=No+Image';
-
-        // Найдём последние записи прихода, привязанные к объекту.
-        // Если записи старые и не имеют object_id, попробуем сопоставить по имени клиента (client_name)
-        const incomesForObj = savedIncome.filter(i => {
-            if ((i.object_id || null) == obj.id) return true;
-            // Если объект имеет назначенного клиента, проверим совпадение по имени
-            if (obj.client_name) {
-                const name = (obj.client_name || '').toString().toLowerCase();
-                if ((i.sender || '').toString().toLowerCase().includes(name)) return true;
-                if ((i.receiver || '').toString().toLowerCase().includes(name)) return true;
-            }
-            // Если текущий пользователь — клиент, сверим по его username
-            if (currentUser && currentUser.role === 'client' && currentUser.username) {
-                const uname = currentUser.username.toString().toLowerCase();
-                if ((i.sender || '').toString().toLowerCase().includes(uname)) return true;
-                if ((i.receiver || '').toString().toLowerCase().includes(uname)) return true;
-            }
-            return false;
-        });
-        const lastIncome = incomesForObj.length ? incomesForObj[incomesForObj.length - 1] : null;
-
-        // Показать блок передачи только если текущий пользователь — клиент и закреплён за этим объектом
-        const showTransfer = currentUser && currentUser.role === 'client' && (obj.client_id == currentUser.id);
 
         return `
             <div class="object-card" onclick="openObjectDetail(${obj.id})">
@@ -598,15 +610,6 @@ function renderObjects() {
                     <h3 class="object-card-title">${obj.name}</h3>
                     <div class="object-card-info">
                         ${obj.address ? `<p class="object-card-address">${obj.address}</p>` : ''}
-                        ${showTransfer && lastIncome ? `
-                            <div class="object-card-transfer">
-                                <img src="${lastIncome.photo || ''}" class="income-photo-preview" alt="Фото передачи">
-                                <div class="transfer-info">
-                                    <div class="transfer-amount">${formatMoney(lastIncome.amount)}</div>
-                                    <div class="transfer-meta">${formatDate(lastIncome.date)} • ${lastIncome.receiver || ''}</div>
-                                </div>
-                            </div>
-                        ` : ''}
                     </div>
                 </div>
             </div>

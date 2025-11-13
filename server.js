@@ -35,6 +35,19 @@ async function initDatabase() {
         budget DECIMAL(12, 2) DEFAULT 0,
         spent DECIMAL(12, 2) DEFAULT 0,
         client_id INTEGER REFERENCES users(id) ON DELETE SET NULL,
+        photo TEXT,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      );
+
+      CREATE TABLE IF NOT EXISTS income (
+        id SERIAL PRIMARY KEY,
+        object_id INTEGER REFERENCES objects(id) ON DELETE SET NULL,
+        date DATE NOT NULL,
+        photo TEXT,
+        amount DECIMAL(12, 2) NOT NULL,
+        sender VARCHAR(255) NOT NULL,
+        receiver VARCHAR(255) NOT NULL,
+        created_by INTEGER REFERENCES users(id) ON DELETE SET NULL,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       );
     `);
@@ -266,6 +279,134 @@ app.delete('/api/users/:id', isAuthenticated, isAdmin, async (req, res) => {
     res.json({ success: true });
   } catch (err) {
     console.error(err);
+    res.status(500).json({ error: 'Ошибка сервера' });
+  }
+});
+
+// API - Приход (Income)
+app.get('/api/income', isAuthenticated, async (req, res) => {
+  try {
+    const { object_id } = req.query;
+    let query = 'SELECT income.*, objects.name as object_name FROM income LEFT JOIN objects ON income.object_id = objects.id';
+    let params = [];
+    let conditions = [];
+
+    // Клиент видит только свои данные
+    if (req.session.role === 'client') {
+      // Получаем объекты клиента
+      const clientObjects = await pool.query('SELECT id FROM objects WHERE client_id = $1', [req.session.userId]);
+      const objectIds = clientObjects.rows.map(o => o.id).map(id => parseInt(id));
+      const username = `%${req.session.username}%`;
+      
+      // Строим условие: данные объектов клиента ИЛИ где клиент sender/receiver
+      let clientConditions = [];
+      let paramIndex = 1;
+      
+      if (objectIds.length > 0) {
+        clientConditions.push(`income.object_id = ANY($${paramIndex})`);
+        params.push(objectIds);
+        paramIndex++;
+      }
+      
+      clientConditions.push(`income.sender ILIKE $${paramIndex}`);
+      params.push(username);
+      paramIndex++;
+      clientConditions.push(`income.receiver ILIKE $${paramIndex}`);
+      params.push(username);
+      
+      // Если указан object_id, фильтруем дополнительно
+      if (object_id) {
+        const objId = parseInt(object_id);
+        // Если объект принадлежит клиенту, показываем только данные этого объекта
+        if (objectIds.includes(objId)) {
+          // Переопределяем условие: только данные этого объекта ИЛИ где клиент sender/receiver
+          conditions.push(`(income.object_id = $${paramIndex} OR income.sender ILIKE $${paramIndex + 1} OR income.receiver ILIKE $${paramIndex + 2})`);
+          params.push(objId);
+          params.push(username);
+          params.push(username);
+        } else {
+          // Объект не принадлежит клиенту, показываем только где клиент sender/receiver
+          conditions.push(`(income.sender ILIKE $${paramIndex} OR income.receiver ILIKE $${paramIndex + 1})`);
+          params.push(username);
+          params.push(username);
+        }
+      } else {
+        // Нет фильтра по объекту - показываем все данные клиента
+        conditions.push('(' + clientConditions.join(' OR ') + ')');
+      }
+    } else {
+      // Админ видит все данные, но может фильтровать по объекту
+      if (object_id) {
+        conditions.push(`income.object_id = $${params.length + 1}`);
+        params.push(object_id);
+      }
+    }
+
+    if (conditions.length > 0) {
+      query += ' WHERE ' + conditions.join(' AND ');
+    }
+
+    query += ' ORDER BY income.date DESC, income.created_at DESC';
+
+    const result = await pool.query(query, params);
+    res.json(result.rows);
+  } catch (err) {
+    console.error('Ошибка загрузки прихода:', err);
+    res.status(500).json({ error: 'Ошибка сервера', details: err.message });
+  }
+});
+
+app.post('/api/income', isAuthenticated, isAdmin, async (req, res) => {
+  try {
+    const { date, photo, amount, sender, receiver, object_id } = req.body;
+
+    if (!date || !amount || !sender || !receiver) {
+      return res.status(400).json({ error: 'Заполните все обязательные поля' });
+    }
+
+    const result = await pool.query(
+      'INSERT INTO income (date, photo, amount, sender, receiver, object_id, created_by) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *',
+      [date, photo || null, amount, sender, receiver, object_id || null, req.session.userId]
+    );
+    res.json(result.rows[0]);
+  } catch (err) {
+    console.error('Ошибка создания прихода:', err);
+    res.status(500).json({ error: 'Ошибка сервера' });
+  }
+});
+
+app.put('/api/income/:id', isAuthenticated, isAdmin, async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { date, photo, amount, sender, receiver, object_id } = req.body;
+
+    if (!date || !amount || !sender || !receiver) {
+      return res.status(400).json({ error: 'Заполните все обязательные поля' });
+    }
+
+    const result = await pool.query(
+      'UPDATE income SET date = $1, photo = $2, amount = $3, sender = $4, receiver = $5, object_id = $6 WHERE id = $7 RETURNING *',
+      [date, photo || null, amount, sender, receiver, object_id || null, id]
+    );
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({ error: 'Запись прихода не найдена' });
+    }
+
+    res.json(result.rows[0]);
+  } catch (err) {
+    console.error('Ошибка обновления прихода:', err);
+    res.status(500).json({ error: 'Ошибка сервера' });
+  }
+});
+
+app.delete('/api/income/:id', isAuthenticated, isAdmin, async (req, res) => {
+  try {
+    const { id } = req.params;
+    await pool.query('DELETE FROM income WHERE id = $1', [id]);
+    res.json({ success: true });
+  } catch (err) {
+    console.error('Ошибка удаления прихода:', err);
     res.status(500).json({ error: 'Ошибка сервера' });
   }
 });
