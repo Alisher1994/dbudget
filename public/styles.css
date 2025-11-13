@@ -606,27 +606,54 @@ body {
     gap: 16px;
 }
 .resource-chart-item {
+    background: var(--bg-primary);
+    border-radius: 12px;
+    box-shadow: var(--shadow);
+    padding: 16px;
     display: flex;
     flex-direction: column;
     align-items: center;
-    background: #fff;
-    border-radius: 16px;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.04);
-    padding: 8px 0 0 0;
+    justify-content: flex-start;
 }
-.resource-chart-item canvas {
-    height: 100px !important;
-    width: 100px !important;
-    border-radius: 50%;
-    background: #f8f8fa;
+.resource-chart-header {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    width: 100%;
+    margin-bottom: 8px;
+    gap: 8px;
+}
+.resource-label {
+    font-size: 15px;
+    font-weight: 500;
+    color: var(--text-primary);
+    margin-left: auto;
 }
 .resource-sums-block {
-    margin-top: 2px;
-    font-size: 13px;
-    font-weight: 500;
+    margin-top: 8px;
     display: flex;
-    gap: 8px;
-    justify-content: center;
+    flex-direction: column;
+    gap: 2px;
+    font-size: 15px;
+    color: var(--text-primary);
+    font-weight: 500;
+    word-break: break-all;
+    align-items: flex-start;
+}
+.resource-sum-plan {
+    color: #888;
+    margin-bottom: 2px;
+}
+.resource-sum-plan span {
+    color: #888;
+    font-weight: 600;
+}
+.resource-sum-fact {
+    color: #34c759;
+}
+.resource-sum-fact span {
+    color: #34c759;
+    font-weight: 600;
 }
 @media (max-width: 900px) {
     .resource-charts-grid {

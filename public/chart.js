@@ -98,15 +98,13 @@ function renderResourceGaugeChart(ctx, label, plan, fact, i) {
     const over = fact > plan;
     const factColor = over ? '#ff9500' : '#34c759';
     const planColor = '#e0e0e0';
-    // Легенда
+    // Легенда убираем, суммы под чартом
     const legendDiv = document.getElementById('resourceLegend' + i);
-    if (legendDiv) {
-        legendDiv.innerHTML = `<span class=\"chart-legend-item\"><span class=\"chart-legend-color\" style=\"background:${planColor}\"></span>План</span><span class=\"chart-legend-item\"><span class=\"chart-legend-color\" style=\"background:${factColor}\"></span>Факт</span>`;
-    }
+    if (legendDiv) legendDiv.innerHTML = '';
     // Суммы под чартом
     const sumBlock = document.getElementById('resourceSumsBlock' + i);
     if (sumBlock) {
-        sumBlock.innerHTML = `<div class=\"resource-sum plan-sum\">План: ${formatSum(plan)}</div><div class=\"resource-sum fact-sum\">Факт: ${formatSum(fact)}</div>`;
+        sumBlock.innerHTML = `<div class=\"resource-sum-plan\">План: <span>${formatSum(plan)}</span></div><div class=\"resource-sum-fact\">Факт: <span>${formatSum(fact)}</span></div>`;
     }
     // Gauge chart с названием сверху
     new Chart(ctx, {
@@ -117,7 +115,7 @@ function renderResourceGaugeChart(ctx, label, plan, fact, i) {
                 data: [Math.min(fact, plan), Math.max(plan - fact, 0)],
                 backgroundColor: [factColor, planColor],
                 borderWidth: 0,
-                cutout: '70%', // стандартная толщина дуги
+                cutout: '70%',
                 circumference: 180,
                 rotation: 270
             }]
@@ -131,7 +129,8 @@ function renderResourceGaugeChart(ctx, label, plan, fact, i) {
                     text: label,
                     align: 'center',
                     color: '#222',
-                    font: { size: 16, weight: 'bold', family: 'Segoe UI' }
+                    font: { size: 16, weight: 'bold' },
+                    padding: { top: 10, bottom: 0 }
                 }
             },
             responsive: true,
