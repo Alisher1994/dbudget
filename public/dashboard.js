@@ -49,6 +49,7 @@ function setupEventListeners() {
     // Модальные окна
     setupModal('objectModal', 'addObjectBtn', 'cancelObjectBtn', 'objectForm', handleObjectSubmit);
     setupModal('userModal', 'addUserBtn', 'cancelUserBtn', 'userForm', handleUserSubmit);
+    setupModal('editUserModal', null, 'cancelEditUserBtn', 'editUserForm', handleEditUserSubmit);
 }
 
 function setupModal(modalId, openBtnId, closeBtnId, formId, submitHandler) {
@@ -245,12 +246,15 @@ function renderUsers() {
     const tbody = document.getElementById('usersTableBody');
     
     if (currentUsers.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="5" class="empty-state">Нет пользователей</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="6" class="empty-state">Нет пользователей</td></tr>';
         return;
     }
 
     tbody.innerHTML = currentUsers.map(user => {
         const canDelete = user.id !== currentUser.id;
+        const statusBadge = user.status === 'active' 
+            ? '<span class="badge badge-success">Активный</span>' 
+            : '<span class="badge badge-secondary">Неактивный</span>';
         
         return `
             <tr>
@@ -261,9 +265,11 @@ function renderUsers() {
                     </span>
                 </td>
                 <td>${user.phone || '—'}</td>
+                <td>${statusBadge}</td>
                 <td>${formatDate(user.created_at)}</td>
                 <td class="actions-col">
                     <div class="table-actions">
+                        <button class="btn btn-secondary btn-small" onclick="editUser(${user.id})">Изменить</button>
                         ${canDelete ? `
                             <button class="btn btn-danger btn-small" onclick="deleteUser(${user.id})">Удалить</button>
                         ` : ''}
@@ -281,7 +287,8 @@ async function handleUserSubmit(e) {
         username: document.getElementById('userLogin').value,
         password: document.getElementById('userPassword').value,
         phone: document.getElementById('userPhone').value,
-        role: document.getElementById('userRole').value
+        role: document.getElementById('userRole').value,
+        status: document.getElementById('userStatus').value
     };
 
     try {
@@ -302,6 +309,49 @@ async function handleUserSubmit(e) {
     } catch (err) {
         console.error('Ошибка:', err);
         alert('Ошибка создания пользователя');
+    }
+}
+
+function editUser(id) {
+    const user = currentUsers.find(u => u.id === id);
+    if (!user) return;
+
+    document.getElementById('editUserId').value = user.id;
+    document.getElementById('editUserLogin').value = user.username;
+    document.getElementById('editUserPhone').value = user.phone || '';
+    document.getElementById('editUserRole').value = user.role;
+    document.getElementById('editUserStatus').value = user.status || 'active';
+    
+    document.getElementById('editUserModal').classList.add('active');
+}
+
+async function handleEditUserSubmit(e) {
+    e.preventDefault();
+    
+    const id = document.getElementById('editUserId').value;
+    const data = {
+        phone: document.getElementById('editUserPhone').value,
+        role: document.getElementById('editUserRole').value,
+        status: document.getElementById('editUserStatus').value
+    };
+
+    try {
+        const response = await fetch(`/api/users/${id}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(data)
+        });
+
+        if (response.ok) {
+            document.getElementById('editUserModal').classList.remove('active');
+            await loadUsers();
+        } else {
+            const error = await response.json();
+            alert(error.error || 'Ошибка обновления пользователя');
+        }
+    } catch (err) {
+        console.error('Ошибка:', err);
+        alert('Ошибка обновления пользователя');
     }
 }
 

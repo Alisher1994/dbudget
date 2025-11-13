@@ -206,7 +206,7 @@ app.delete('/api/objects/:id', isAuthenticated, isAdmin, async (req, res) => {
 // API - Пользователи
 app.get('/api/users', isAuthenticated, isAdmin, async (req, res) => {
   try {
-    const result = await pool.query('SELECT id, username, role, phone, created_at FROM users ORDER BY created_at DESC');
+    const result = await pool.query('SELECT id, username, role, phone, status, created_at FROM users ORDER BY created_at DESC');
     res.json(result.rows);
   } catch (err) {
     console.error(err);
@@ -216,17 +216,38 @@ app.get('/api/users', isAuthenticated, isAdmin, async (req, res) => {
 
 app.post('/api/users', isAuthenticated, isAdmin, async (req, res) => {
   try {
-    const { username, password, role, phone } = req.body;
+    const { username, password, role, phone, status } = req.body;
     const hashedPassword = await bcrypt.hash(password, 10);
     const result = await pool.query(
-      'INSERT INTO users (username, password, role, phone) VALUES ($1, $2, $3, $4) RETURNING id, username, role, phone, created_at',
-      [username, hashedPassword, role || 'client', phone || null]
+      'INSERT INTO users (username, password, role, phone, status) VALUES ($1, $2, $3, $4, $5) RETURNING id, username, role, phone, status, created_at',
+      [username, hashedPassword, role || 'client', phone || null, status || 'active']
     );
     res.json(result.rows[0]);
   } catch (err) {
     if (err.code === '23505') { // Unique violation
       return res.status(400).json({ error: 'Пользователь с таким именем уже существует' });
     }
+    console.error(err);
+    res.status(500).json({ error: 'Ошибка сервера' });
+  }
+});
+
+app.put('/api/users/:id', isAuthenticated, isAdmin, async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { phone, role, status } = req.body;
+    
+    const result = await pool.query(
+      'UPDATE users SET phone = $1, role = $2, status = $3 WHERE id = $4 RETURNING id, username, role, phone, status, created_at',
+      [phone || null, role, status || 'active', id]
+    );
+    
+    if (result.rows.length === 0) {
+      return res.status(404).json({ error: 'Пользователь не найден' });
+    }
+    
+    res.json(result.rows[0]);
+  } catch (err) {
     console.error(err);
     res.status(500).json({ error: 'Ошибка сервера' });
   }

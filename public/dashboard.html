@@ -3,13 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DBudget - Панель управления</title>
+    <title>Design Key - Панель управления</title>
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
     <div class="app-container">
         <header class="header">
-            <h1>DBudget</h1>
+            <h1>Design Key</h1>
             <div class="user-info">
                 <span id="userName"></span>
                 <button id="logoutBtn" class="btn btn-secondary">Выйти</button>
@@ -33,13 +33,13 @@
                     <table class="data-table">
                         <thead>
                             <tr>
-                                <th>Название</th>
-                                <th>Адрес</th>
-                                <th>Бюджет</th>
-                                <th>Потрачено</th>
-                                <th>Остаток</th>
-                                <th>Клиент</th>
-                                <th class="actions-col">Действия</th>
+                                <th style="width: 20%;">Название</th>
+                                <th style="width: 20%;">Адрес</th>
+                                <th style="width: 10%;">Бюджет</th>
+                                <th style="width: 10%;">Потрачено</th>
+                                <th style="width: 10%;">Остаток</th>
+                                <th style="width: 15%;">Клиент</th>
+                                <th class="actions-col" style="width: 15%;">Действия</th>
                             </tr>
                         </thead>
                         <tbody id="objectsTableBody">
@@ -65,13 +65,14 @@
                                 <th>Логин</th>
                                 <th>Роль</th>
                                 <th>Телефон</th>
+                                <th>Статус</th>
                                 <th>Дата создания</th>
                                 <th class="actions-col">Действия</th>
                             </tr>
                         </thead>
                         <tbody id="usersTableBody">
                             <tr>
-                                <td colspan="5" class="empty-state">Загрузка...</td>
+                                <td colspan="6" class="empty-state">Загрузка...</td>
                             </tr>
                         </tbody>
                     </table>
@@ -150,9 +151,55 @@
                         <option value="admin">Администратор</option>
                     </select>
                 </div>
+                <div class="form-group">
+                    <label>Статус</label>
+                    <select id="userStatus" required>
+                        <option value="active">Активный</option>
+                        <option value="inactive">Неактивный</option>
+                    </select>
+                </div>
                 <div class="modal-actions">
                     <button type="button" class="btn btn-secondary" id="cancelUserBtn">Отмена</button>
                     <button type="submit" class="btn btn-primary">Создать</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Модальное окно для редактирования пользователя -->
+    <div id="editUserModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Редактировать пользователя</h3>
+                <span class="close">&times;</span>
+            </div>
+            <form id="editUserForm">
+                <input type="hidden" id="editUserId">
+                <div class="form-group">
+                    <label>Логин</label>
+                    <input type="text" id="editUserLogin" readonly style="background: var(--bg-secondary);">
+                </div>
+                <div class="form-group">
+                    <label>Телефон</label>
+                    <input type="tel" id="editUserPhone" placeholder="+998901234567">
+                </div>
+                <div class="form-group">
+                    <label>Роль</label>
+                    <select id="editUserRole" required>
+                        <option value="client">Клиент</option>
+                        <option value="admin">Администратор</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Статус</label>
+                    <select id="editUserStatus" required>
+                        <option value="active">Активный</option>
+                        <option value="inactive">Неактивный</option>
+                    </select>
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="btn btn-secondary" id="cancelEditUserBtn">Отмена</button>
+                    <button type="submit" class="btn btn-primary">Сохранить</button>
                 </div>
             </form>
         </div>
