@@ -81,8 +81,19 @@ function setupEventListeners() {
     const saveIncome = document.getElementById('saveIncome');
     const cancelIncome = document.getElementById('cancelIncome');
     const incomeForm = document.getElementById('incomeForm');
+    let editingIncomeIndex = null;
+
+    const readFileAsDataURL = (file) => new Promise((resolve, reject) => {
+        if (!file) return resolve('');
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result);
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+    });
 
     addIncomeBtn.addEventListener('click', () => {
+        editingIncomeIndex = null;
+        incomeForm.reset();
         incomeModal.classList.add('active');
     });
 
@@ -94,10 +105,9 @@ function setupEventListeners() {
         incomeModal.classList.remove('active');
     });
 
-    saveIncome.addEventListener('click', () => {
+    saveIncome.addEventListener('click', async () => {
         const date = document.getElementById('incomeDate').value;
         const photoInput = document.getElementById('incomePhoto');
-        const photo = photoInput.files[0] ? URL.createObjectURL(photoInput.files[0]) : '';
         const amount = document.getElementById('incomeAmount').value;
         const sender = document.getElementById('incomeSender').value;
         const receiver = document.getElementById('incomeReceiver').value;
@@ -107,16 +117,19 @@ function setupEventListeners() {
             return;
         }
 
-        const incomeData = {
-            date,
-            photo,
-            amount,
-            sender,
-            receiver
-        };
+        const photoFile = photoInput.files[0];
+        const photo = await readFileAsDataURL(photoFile);
+
+        const incomeData = { date, photo, amount, sender, receiver };
 
         const savedData = JSON.parse(localStorage.getItem('incomeData')) || [];
-        savedData.push(incomeData);
+        if (editingIncomeIndex === null) {
+            savedData.push(incomeData);
+        } else {
+            // replace existing
+            savedData[editingIncomeIndex] = incomeData;
+        }
+
         localStorage.setItem('incomeData', JSON.stringify(savedData));
 
         alert('Данные сохранены!');
@@ -157,6 +170,31 @@ function setupEventListeners() {
         if (event.target.classList.contains('delete-income')) {
             const rowIndex = event.target.closest('tr').rowIndex - 1; // Учитываем заголовок таблицы
             deleteIncomeData(rowIndex);
+            return;
+        }
+
+        if (event.target.classList.contains('edit-income')) {
+            const rowIndex = event.target.closest('tr').rowIndex - 1;
+            const savedData = JSON.parse(localStorage.getItem('incomeData')) || [];
+            const data = savedData[rowIndex];
+            if (!data) return;
+
+            // Populate modal with existing data
+            document.getElementById('incomeDate').value = data.date || '';
+            document.getElementById('incomeAmount').value = data.amount || '';
+            document.getElementById('incomeSender').value = data.sender || '';
+            document.getElementById('incomeReceiver').value = data.receiver || '';
+            // Note: file inputs cannot be set programmatically for security reasons.
+            // We keep existing photo in preview until user selects a new one.
+            const preview = document.querySelector('#incomeModal .photo-preview');
+            if (preview) {
+                preview.src = data.photo || '';
+                preview.style.display = data.photo ? 'inline-block' : 'none';
+            }
+
+            editingIncomeIndex = rowIndex;
+            incomeModal.classList.add('active');
+            return;
         }
     });
 
@@ -173,8 +211,8 @@ function setupEventListeners() {
                 <td>${data.sender}</td>
                 <td>${data.receiver}</td>
                 <td>
-                    <button class="btn btn-primary edit-income">Изменить</button>
-                    <button class="btn btn-danger delete-income">Удалить</button>
+                    <button class="edit-btn edit-income">Изменить</button>
+                    <button class="delete-btn delete-income">Удалить</button>
                 </td>
             `;
             incomeTableBody.appendChild(newRow);
@@ -182,41 +220,6 @@ function setupEventListeners() {
     };
 
     loadIncomeData();
-
-    const editIncome = document.querySelectorAll('.edit-btn');
-
-    editIncome.forEach((button, index) => {
-        button.addEventListener('click', () => {
-            const savedData = JSON.parse(localStorage.getItem('incomeData')) || [];
-            const incomeItem = savedData[index];
-
-            if (incomeItem) {
-                document.getElementById('incomeDate').value = incomeItem.date;
-                document.getElementById('incomeAmount').value = incomeItem.amount;
-                document.getElementById('incomeSender').value = incomeItem.sender;
-                document.getElementById('incomeReceiver').value = incomeItem.receiver;
-                const photoInput = document.getElementById('incomePhoto');
-                photoInput.value = '';
-
-                incomeModal.classList.add('active');
-
-                saveIncome.addEventListener('click', () => {
-                    incomeItem.date = document.getElementById('incomeDate').value;
-                    incomeItem.amount = document.getElementById('incomeAmount').value;
-                    incomeItem.sender = document.getElementById('incomeSender').value;
-                    incomeItem.receiver = document.getElementById('incomeReceiver').value;
-
-                    const updatedData = JSON.parse(localStorage.getItem('incomeData')) || [];
-                    updatedData[index] = incomeItem;
-                    localStorage.setItem('incomeData', JSON.stringify(updatedData));
-
-                    alert('Данные обновлены!');
-                    incomeModal.classList.remove('active');
-                    loadIncomeData();
-                });
-            }
-        });
-    });
 }
 
 function setupModal(modalId, openBtnId, closeBtnId, formId, submitHandler) {

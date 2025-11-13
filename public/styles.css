@@ -990,8 +990,9 @@ body {
     overflow: hidden;
 }
 .income-table th, .income-table td {
-    width: 150px;
-    text-align: center;
+    padding: 12px;
+    text-align: left;
+    border-bottom: 1px solid var(--border-color);
 }
 .income-table th {
     background: var(--bg-secondary);
@@ -1010,6 +1011,23 @@ body {
     object-fit: cover;
     border-radius: 8px;
     box-shadow: var(--shadow);
+}
+
+/* Сделать столбцы таблицы Приход одинаковой ширины */
+.income-table {
+    width: 100%;
+    table-layout: fixed;
+}
+.income-table th,
+.income-table td {
+    width: calc(100% / 7);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+.income-table td .income-photo-preview {
+    display: inline-block;
+    vertical-align: middle;
 }
 
 button.edit-btn, button.delete-btn {
