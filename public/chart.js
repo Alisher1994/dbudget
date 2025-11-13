@@ -196,10 +196,10 @@ function renderResourceGaugeChart(ctx, label, plan, fact, i) {
     }
 }
 
-function renderResourceChart(ctx, label, plan, fact) {
-    // Верхняя линия — факт, нижняя — план
-    const barHeight = 18;
-    const gap = 12;
+function renderResourceChart(ctx, label, plan, fact, color = '#34c759') {
+    // Верхняя линия — факт, нижняя — план, с разделением
+    const barHeight = 16;
+    const gap = 10;
     const width = ctx.canvas.width;
     const height = ctx.canvas.height;
     ctx.clearRect(0, 0, width, height);
@@ -207,40 +207,40 @@ function renderResourceChart(ctx, label, plan, fact) {
     ctx.save();
     ctx.fillStyle = '#e0e0e0';
     ctx.beginPath();
-    ctx.moveTo(12, barHeight + gap);
-    ctx.lineTo(width - 12, barHeight + gap);
-    ctx.arcTo(width - 2, barHeight + gap, width - 2, barHeight * 2 + gap, 7);
-    ctx.lineTo(width - 2, barHeight * 2 + gap);
-    ctx.lineTo(12, barHeight * 2 + gap);
-    ctx.arcTo(2, barHeight * 2 + gap, 2, barHeight + gap, 7);
+    ctx.moveTo(12, barHeight + gap + 10);
+    ctx.lineTo(width - 12, barHeight + gap + 10);
+    ctx.arcTo(width - 2, barHeight + gap + 10, width - 2, barHeight * 2 + gap + 10, 6);
+    ctx.lineTo(width - 2, barHeight * 2 + gap + 10);
+    ctx.lineTo(12, barHeight * 2 + gap + 10);
+    ctx.arcTo(2, barHeight * 2 + gap + 10, 2, barHeight + gap + 10, 6);
     ctx.closePath();
     ctx.fill();
     // Сумма плана внутри линии
-    ctx.font = '12px Segoe UI';
+    ctx.font = '11px Segoe UI';
     ctx.fillStyle = '#555';
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
-    ctx.fillText(`План: ${formatSum(plan)}`, width / 2, barHeight * 1.5 + gap);
+    ctx.fillText(`${formatSum(plan)}`, width / 2, barHeight * 1.5 + gap + 10);
     ctx.restore();
     // Верхняя линия (факт)
     const factWidth = Math.max(32, (width - 24) * (fact / Math.max(plan, fact, 1)));
     ctx.save();
-    ctx.fillStyle = '#34c759';
+    ctx.fillStyle = color;
     ctx.beginPath();
     ctx.moveTo(12, gap);
     ctx.lineTo(factWidth + 12, gap);
-    ctx.arcTo(factWidth + 22, gap, factWidth + 22, barHeight + gap, 7);
+    ctx.arcTo(factWidth + 22, gap, factWidth + 22, barHeight + gap, 6);
     ctx.lineTo(factWidth + 22, barHeight + gap);
     ctx.lineTo(12, barHeight + gap);
-    ctx.arcTo(2, barHeight + gap, 2, gap, 7);
+    ctx.arcTo(2, barHeight + gap, 2, gap, 6);
     ctx.closePath();
     ctx.fill();
     // Сумма факта внутри линии
-    ctx.font = '12px Segoe UI';
+    ctx.font = '11px Segoe UI';
     ctx.fillStyle = '#fff';
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
-    ctx.fillText(`Факт: ${formatSum(fact)}`, factWidth / 2 + 12, barHeight / 2 + gap);
+    ctx.fillText(`${formatSum(fact)}`, factWidth / 2 + 12, barHeight / 2 + gap);
     ctx.restore();
 }
 
